@@ -4,10 +4,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useLoginMutation } from "../../apps/features/apiSlice";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../apps/features/AuthSlice";
 
 const LoginPage = () => {
   const [login, { isLoading, isError, error }] = useLoginMutation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const formik = useFormik({
     initialValues: {
@@ -20,24 +23,22 @@ const LoginPage = () => {
         .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
     }),
-    onSubmit: async (values, { setSubmitting }) => {
-      try {
+    onSubmit: async (values) => {
+      try{
         const response = await login(values).unwrap();
-        console.log("Login Successful:", response);
+        dispatch(
+          setCredentials({
+            id: response.id,
+            accessToken: response.accessToken,
+          })
+        );
         navigate("/");
-
-        // Store token in localStorage
-        if (response?.accessToken) {
-          localStorage.setItem("userId", response.id);
-          localStorage.setItem("authToken", response.accessToken);
-          console.log("Token stored in localStorage");
-        }
-      } catch (err) {
-        console.error("Login Failed:", err);
-      } finally {
-        setSubmitting(false);
       }
-    },
+      catch(err){
+      console.error("Login Failed:", err);
+      alert(err.data?.message || "Login failed. Please try again.");
+    }
+  }
   });
 
   return (
