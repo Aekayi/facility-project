@@ -53,7 +53,10 @@ const SettingBox = () => {
           />
         </svg>
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+          <div
+            className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10"
+            ref={menuRef}
+          >
             <div
               className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
               onClick={() => {
@@ -62,6 +65,15 @@ const SettingBox = () => {
               }}
             >
               Logout
+            </div>
+            <div
+              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              onClick={() => {
+                setIsOpen(false);
+                navigate("/change-password");
+              }}
+            >
+              Change Password
             </div>
           </div>
         )}

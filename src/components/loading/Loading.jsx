@@ -1,26 +1,12 @@
 import React from "react";
-import LocalIcon from "../../assets/icons";
+import localIcon from "../../assets/icons";
 
-export const Loading = () => {
+const Loading = () => {
   return (
-    <div className="loading-container">
-      <img src={LocalIcon.Loading} alt="Loading" title="Loading" />
+    <div className=" h-full w-2/3 max-w-md bg-white flex justify-center items-center ">
+      <img src={localIcon.Loading} alt="Loading..." className="w-1/4" />
     </div>
   );
 };
 
-// export const RoomLoading = ({ design }) => {
-//   return (
-//     <div className={design ? design : "facility-loading"}>
-//       <img src={LocalIcon.Loading} alt="Loading" title="Loading" />
-//     </div>
-//   );
-// };
-
-// export const BookedLoading = ({}) => {
-//   return (
-//     <div className="book-loading">
-//       <img src={LocalIcon.Loading} alt="Loading" title="Loading" />
-//     </div>
-//   );
-// };
+export default Loading;

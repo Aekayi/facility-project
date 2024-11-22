@@ -2,13 +2,14 @@ import React from "react";
 import { useFacilitiesQuery } from "../apps/features/apiSlice";
 import { useNavigate } from "react-router-dom";
 import SettingBox from "../components/SettingBox";
+import Loading from "../components/loading/Loading";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError, error } = useFacilitiesQuery();
   // console.log(data);
   if (isLoading) {
-    <div>Loading...</div>;
+    return <Loading />;
   }
   if (isError) {
     return <div>Error: {error?.message || "Failed to fetch facilities"}</div>;
@@ -35,7 +36,9 @@ const Dashboard = () => {
                   alt="name"
                   className="w-24 h-24 object-cover mb-4"
                 />
-                <h3 className="text-lg font-semibold">{facility.name}</h3>
+                <h3 className="text-lg font-semibold text-blue-500">
+                  {facility.name}
+                </h3>
               </div>
             </button>
           ))}

@@ -7,6 +7,9 @@ import ChangePasswordPage from "./pages/login/ChangePasswordPage";
 import Fleet from "./pages/Fleet/Fleet";
 import MeetingRoom from "./pages/meetingRoom/MeetingRoom";
 import PublicRoute from "./utils/PublicRoute";
+import MeetingRoomById from "./pages/meetingRoom/MeetingRoomById";
+import FleetById from "./pages/Fleet/FleetById";
+
 function App() {
   return (
     <div className="layout bg-blue-300 h-screen">
@@ -39,10 +42,26 @@ function App() {
               }
             />
             <Route
-              path="/Meeting Room"
+              path="/Meeting Room/"
               element={
                 <ProtectedRoutes>
                   <MeetingRoom />
+                </ProtectedRoutes>
+              }
+            />
+            <Route
+              path="/Meeting Room/:id"
+              element={
+                <ProtectedRoutes>
+                  <MeetingRoomById />
+                </ProtectedRoutes>
+              }
+            />
+            <Route
+              path="/Fleet/:id"
+              element={
+                <ProtectedRoutes>
+                  <FleetById />
                 </ProtectedRoutes>
               }
             />

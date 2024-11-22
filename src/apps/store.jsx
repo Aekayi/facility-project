@@ -4,7 +4,6 @@ import persistStore from "redux-persist/es/persistStore";
 import persistReducer from "redux-persist/es/persistReducer";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./features/AuthSlice";
-import loadingReducer from "./features/loadingSlice";
 
 const persistConfig = {
   key: "auth",
@@ -17,7 +16,6 @@ export const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
     auth: persistedReducer,
-    loading: loadingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

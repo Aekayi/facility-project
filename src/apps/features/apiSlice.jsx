@@ -23,19 +23,35 @@ export const apiSlice = createApi({
         },
       }),
     }),
-    // changePassword: builder.mutation({
-    //   query: ({ id, newPassword }) => ({
-    //     url: `users/${id}`,
-    //     method: "PUT",
-    //     body: { password: newPassword },
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   }),
-    // }),
+    changePassword: builder.mutation({
+      query: ({ id, newPassword, confirmPassword }) => ({
+        url: `/api/change-password/${id}`,
+        method: "PUT",
+        body: { password: newPassword, confirmPassword },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
     facilities: builder.query({
       query: () => `/api/categories`,
     }),
+    facilityid: builder.query({
+      query: (id) => `/api/facilities/${id}`,
+    }),
+    meetingrooms: builder.query({
+      query: () => `/api/facilityByCat/Meeting Room`,
+    }),
+    fleet: builder.query({
+      query: () => `/api/facilityByCat/Fleet`,
+    }),
   }),
 });
-export const { useLoginMutation, useFacilitiesQuery } = apiSlice;
+export const {
+  useLoginMutation,
+  useFacilitiesQuery,
+  useMeetingroomsQuery,
+  useFacilityidQuery,
+  useFleetQuery,
+  useChangePasswordMutation,
+} = apiSlice;
