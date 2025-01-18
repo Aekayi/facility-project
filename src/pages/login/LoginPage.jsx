@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import logo from "../../assets/logo.png";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -6,9 +6,12 @@ import { useLoginMutation } from "../../apps/features/apiSlice";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../apps/features/AuthSlice";
+import { UserContext } from "../../context/userContext";
 
 const LoginPage = () => {
   const [login, { isLoading, isError, error }] = useLoginMutation();
+  const { setUser } = useContext(UserContext);
+  console.log("set", setUser);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -26,12 +29,14 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       try {
         const response = await login(values).unwrap();
+        console.log("response", response);
         dispatch(
           setCredentials({
             id: response.data.user.id,
             token: response.data.token,
           })
         );
+
         navigate("/");
       } catch (err) {
         console.error("Login Failed:", err);
@@ -89,6 +94,7 @@ const LoginPage = () => {
         >
           {isLoading ? "Logging in..." : "Login"}
         </button>
+
         {isError && (
           <div className="text-red-600">
             Error:{" "}

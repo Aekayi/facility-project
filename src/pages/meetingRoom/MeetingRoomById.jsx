@@ -3,8 +3,9 @@ import { useFacilityidQuery } from "../../apps/features/apiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../../components/loading/Loading";
 import LocalIcon from "../../assets/icons";
+import BookingDate from "../booking-date/bookingDate";
 
-const MeetingRoomById = () => {
+const MeetingRoomById = (roomId, bookedDate) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data, isLoading, isError, error } = useFacilityidQuery(id);
@@ -39,6 +40,7 @@ const MeetingRoomById = () => {
           className="w-full h-[200px] rounded-md object-cover mb-4 me-4"
         />
       </div>
+      <BookingDate roomId={roomId} bookedDate={bookedDate} />
     </div>
   );
 };

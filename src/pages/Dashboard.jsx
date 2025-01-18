@@ -15,7 +15,7 @@ const Dashboard = () => {
     return <div>Error: {error?.message || "Failed to fetch facilities"}</div>;
   }
   return (
-    <div className=" h-full w-2/3 max-w-md bg-white  ">
+    <div className=" h-full w-2/3 max-w-md">
       <div className="m-4">
         <div className="container flex justify-between items-center py-3 px-4 mb-4 border  border-gray-300 shadow rounded">
           <h1 className="text-xl font-semibold text-blue-500">
