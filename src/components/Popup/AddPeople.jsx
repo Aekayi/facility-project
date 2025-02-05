@@ -21,6 +21,7 @@ function AddPeople({
   setFilteredPeople,
 }) {
   const [inputValue, setInputValue] = useState("");
+  const [guestInput, setGuestInput] = useState("");
   const [searchPeople, setSearchPeople] = useState([]);
   // const [filteredPeople, setFilteredPeople] = useState([]);
   // const [addPerson, setAddPerson] = useState([]);
@@ -98,15 +99,10 @@ function AddPeople({
     const updatedItems = showFilteredPeople?.filter(
       (people) => people.id !== person.id
     );
-    console.log(updatedItems, "updatedItemsss");
 
     setShowFilteredPeople(updatedItems);
     setAddPerson(updatedItems);
   };
-
-  // const handleItemRemove = (person) => {
-  //   setAddPerson(addPerson.filter((p) => p.id !== person.id));
-  // };
 
   const handleSearchPeople = (value) => {
     const result = allUser?.filter((person) =>
@@ -116,14 +112,11 @@ function AddPeople({
   };
 
   const handleSelectAll = (e) => {
-    // setInputValue(e.target.value);
     setSelectAll((prevSelectAll) => !prevSelectAll);
     if (!selectAll) {
       setAddPerson(allUser);
-      // setIsPersonAdded(true)
     } else {
       setAddPerson([]);
-      // setIsPersonAdded(false)
     }
   };
 
@@ -159,10 +152,10 @@ function AddPeople({
 
   return (
     <>
-      <section className="addPeopeContainer flex ml-2 ">
+      <section className="addPeopeContainer flex justify-start items-center gap-4 ">
         <AiOutlineUsergroupAdd
           size={20}
-          className="addGroup w-[40px] pr-[15px]"
+          className="text-[#05445E] ml-[-5px] w-[40px] "
         />
         <input
           type="text"
@@ -174,7 +167,7 @@ function AddPeople({
             setIsDropdownOpen((prev) => !prev);
             dropDownList();
           }}
-          className="bg-transparent outline-none focus:outline-none  placeholder:text-gray-500 border-b border-gray-300 w-full"
+          className="bg-transparent outline-none focus:outline-none placeholder:text-gray-500 border-b border-gray-300 w-full"
         />
       </section>
 
@@ -185,32 +178,30 @@ function AddPeople({
         ref={inputRef}
       >
         {isDropdownOpen && (
-          <div className="scrollbar-create py-[10px] px-[15px] border-[0.4px] border-gray-300 rounded-lg bg-slate-300 shadow-md">
-            <div className="flex  justify-between items-center mb-4">
-              <div>
-                <input
-                  type="text"
-                  // value={searchPeople}
-                  onChange={(e) => handleSearchPeople(e.target.value)}
-                  name=""
-                  placeholder="Search people"
-                  id=""
-                  className=" focus:outline-none bg-transparent text-gray-500 ml-4"
-                />
-              </div>
-              <div
-                className="close-btn "
-                onClick={() => setIsDropdownOpen(false)}
-              >
-                <img
-                  src={Images.CloseIcon}
-                  alt="close"
-                  className="w-[16px] mt-2 cursor-pointer filter-[contrast(0.5)]"
-                />
-              </div>
+          <div className="scrollbar-create py-[10px] px-[15px] border-[0.4px] border-[#05445E] rounded-lg bg-[#d4f1f4] shadow-md">
+            <div
+              className="close-btn flex justify-end "
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              <img
+                src={Images.CloseIcon}
+                alt="close"
+                className="w-[16px] mt-2 cursor-pointer filter-[contrast(0.5)]"
+              />
+            </div>
+            <div className="border-b border-[#05445e66] focus:outline-none">
+              <input
+                type="text"
+                // value={searchPeople}
+                onChange={(e) => handleSearchPeople(e.target.value)}
+                name=""
+                placeholder="Search people"
+                id=""
+                className="bg-transparent outline-none focus:outline-none placeholder:text-gray-500  mb-2 ml-2 text-sm w-full"
+              />
             </div>
             <div
-              className="user-list-box min-h-[350px] max-h-[350px] overflow-auto w-full py-[5px] px-[15px] mt-[5px]"
+              className="user-list-box min-h-[350px] max-h-[350px] overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200  w-full py-[5px] px-[15px] mt-[5px]"
               // style={{
               //   maxHeight:
               //     facilityFilter[0]?.needLocation == 0 ? "130px" : "190px",
@@ -219,12 +210,12 @@ function AddPeople({
               {/* <LoadingComponent loadingGroup={"u"} design="true"> */}
               {inputValue == "" ? (
                 <div
-                  className="all-Box h-[50px] flex align-middle justify-between border-b-[1px] border-gray-300 cursor-pointer"
+                  className="h-[50px] flex justify-between items-center border-b-[1px] border-[#05445e66] cursor-pointer"
                   onClick={(e) => handleSelectAll(e)}
                 >
-                  <div className="all-Img flex align-middle gap-[10px]">
+                  <div className="flex items-center gap-[10px]">
                     <figure
-                      className="all-Icon w-[30px] h-[30px] rounded-[180px] bg-[#05445e] text-white ml-[4px] flex justify-center items-center
+                      className="w-[30px] h-[30px] rounded-[180px] bg-[#05445e] text-white ml-[4px] flex justify-center items-center
                     "
                     >
                       A
@@ -242,7 +233,7 @@ function AddPeople({
               ) : null}
               {filteredPeople?.map((person, index) => (
                 <div
-                  className="dropDownPeopleList flex justify-between items-center h-[50px] ml-[4px] cursor-pointer"
+                  className=" flex justify-between items-center h-[50px] ml-[4px] cursor-pointer border-b-[1px] border-[#05445e66] "
                   key={index}
                   onClick={(e) => handleSelectDropDownPerson(person)}
                 >
@@ -292,17 +283,17 @@ function AddPeople({
                 <div className="flex">
                   <article className="showPeopleContainer flex content-center">
                     {person?.avatar_url !== null ? (
-                      <figure className="shwoPeopleImgCustom w-[30px] h-[30px] bg-[#05445e] rounded-[180px] flex justify-center items-center text-white">
+                      <figure className=" w-[30px] h-[30px] bg-[#05445e] rounded-[180px] flex justify-center items-center text-white">
                         {person?.name?.split("").slice(0, 1)}
                       </figure>
                     ) : (
                       <img
                         src={person?.avatar_url}
-                        className="shwoPeopleImg w-[30px] h-[30px] rounded-[180px]"
+                        className=" w-[30px] h-[30px] rounded-[180px]"
                       />
                     )}
 
-                    <span className="shwoPeopleName ml-[5px] p-1 h-[30px]">
+                    <span className=" ml-[5px] p-1 h-[30px]">
                       {person?.name}
                     </span>
                   </article>

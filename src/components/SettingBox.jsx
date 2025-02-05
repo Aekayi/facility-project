@@ -18,7 +18,6 @@ const SettingBox = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        console.log(menuRef.current);
         setIsOpen(false);
       }
     };
@@ -35,12 +34,12 @@ const SettingBox = () => {
   return (
     <div className="relative z-50">
       <button
-        className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+        className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#05445E]"
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-gray-800"
+          className="h-8 w-8 text-[#05445E]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

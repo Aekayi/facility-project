@@ -47,7 +47,7 @@ const LoginPage = () => {
 
   return (
     <form
-      className="p-6 h-full w-2/3 max-w-md bg-white"
+      className="p-6 h-screen w-2/3 max-w-md bg-white"
       onSubmit={formik.handleSubmit}
     >
       <div className="mt-10 flex flex-col items-center">
@@ -89,7 +89,7 @@ const LoginPage = () => {
       <div className="!mt-8">
         <button
           type="submit"
-          className="w-full py-2 px-4 text-lg tracking-wide rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none font-bold"
+          className="w-full py-2 px-4 text-lg tracking-wide rounded-lg text-white bg-[#05445E] hover:bg-[#05445E]/80 focus:outline-none font-bold"
           disabled={formik.isSubmitting || isLoading}
         >
           {isLoading ? "Logging in..." : "Login"}

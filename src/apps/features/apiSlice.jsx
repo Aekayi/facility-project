@@ -21,6 +21,7 @@ export const apiSlice = createApi({
       }
     },
   }),
+  tagTypes: ["Booking"],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -34,14 +35,17 @@ export const apiSlice = createApi({
     }),
 
     changePassword: builder.mutation({
-      query: ({ oldPassword, newPassword, confirmPassword }) => ({
+      query: ({ password, current_password }) => ({
         url: `/api/change-password`,
         method: "POST",
-        body: { oldPassword, password: newPassword, confirmPassword },
+        body: { password, current_password },
         headers: {
           "Content-Type": "application/json",
         },
       }),
+      transformResponse: (response) => {
+        return response || { message: "Password changed successfully!" };
+      },
     }),
 
     users: builder.query({
@@ -56,7 +60,6 @@ export const apiSlice = createApi({
     }),
     facilityid: builder.query({
       query: (facilityByRoomId) => {
-        console.log("facilityid", facilityByRoomId);
         return `/api/facilities/${facilityByRoomId}`;
       },
     }),
@@ -76,20 +79,19 @@ export const apiSlice = createApi({
           "Content-Type": "application/json",
         },
       }),
+      invalidatesTags: ["Booking"],
     }),
     getHolidays: builder.query({
       query: () => `/api/holidays`,
     }),
     bookedListByDate: builder.query({
       query: ({ facilityByRoomId, bookedListByDate }) => {
-        console.log(facilityByRoomId);
-        console.log(bookedListByDate);
         return `/api/bookingList/${facilityByRoomId}/${bookedListByDate}`;
       },
+      providesTags: ["Booking"],
     }),
     userbyId: builder.query({
       query: (id) => {
-        console.log("id", id);
         return `/api/users/${id}`;
       },
     }),
@@ -98,6 +100,7 @@ export const apiSlice = createApi({
         url: `/api/bookRequest/${bookingId}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Booking"],
     }),
     updateBooking: builder.mutation({
       query: ({ bookingId, data }) => ({
@@ -108,20 +111,19 @@ export const apiSlice = createApi({
         },
         body: data,
       }),
+      invalidatesTags: ["Booking"],
     }),
-    // updateBooking: builder.mutation({
-    //   query: ({ bookingId, data }) => {
-    //     console.log("Booking ID.....:", bookingId); // Log the bookingId
-    //     return {
-    //       url: `/api/bookRequest/${bookingId}`,
-    //       method: "PUT",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: data,
-    //     };
-    //   },
-    // }),
+    approvedBooking: builder.mutation({
+      query: ({ bookingId, status }) => ({
+        url: `/api/bookingStatus/${bookingId}`, // Dynamic booking ID in URL
+        method: "POST",
+        params: { status }, // Pass status as a query parameter
+      }),
+      invalidatesTags: ["Booking"],
+    }),
+    locations: builder.query({
+      query: () => `/api/locations`,
+    }),
   }),
 });
 export const {
@@ -139,4 +141,6 @@ export const {
   useBookedListByDateQuery,
   useDeleteBookingMutation,
   useUpdateBookingMutation,
+  useApprovedBookingMutation,
+  useLocationsQuery,
 } = apiSlice;

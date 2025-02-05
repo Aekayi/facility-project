@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* body {
-  @apply bg-blue-300;
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
-} */
+
+body {
+  @apply font-manrope bg-[#d4f1f4]
+}
+

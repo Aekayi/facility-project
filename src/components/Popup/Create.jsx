@@ -2,69 +2,131 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   useCreateBookingMutation,
   useParticipantsQuery,
+  useFacilitiesQuery,
+  useLocationsQuery,
+  useBookedListByDateQuery,
   useUsersQuery,
 } from "../../apps/features/apiSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import timeList from "../../assets/public/time.json";
-import { MdMoreTime } from "react-icons/md";
-import AddPeople from "./AddPeople";
-import { useSearchParams } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import {
+  MdMoreTime,
+  MdOutlineAddLocationAlt,
+  MdOutlineTitle,
+} from "react-icons/md";
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
+import AddPeople from "./AddPeople";
+import { useParams, useSearchParams } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import AddLocationModal from "./AddLocationModal";
+import Loading from "../loading/Loading";
+import { AiOutlineUngroup } from "react-icons/ai";
+import NewLocation from "./NewLocation";
+import CreateGoogleMap from "./CreateGoogleMap";
 
-const Create = ({ facilityByRoomId, onClose }) => {
+const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
+  const { facilityName } = useParams();
+  const dispatch = useDispatch();
   const [createBooking, { isLoading, isError, isSuccess }] =
     useCreateBookingMutation();
   const [success, setSuccess] = useState(false);
   const { data: participants } = useParticipantsQuery();
-  const [searchParams] = useSearchParams();
-  // const [selectedDate, setSelectedDate] = useState(
-  //   searchParams.get("date")
-  //     ? dayjs(searchParams.get("date"))
-  //     : dayjs(new Date())
-  // );
-  // const [bookedListByDate, setBookedListByDate] = useState(
-  //   dayjs(selectedDate).format("YYYY-MM-DD")
-  // );
-
-  const participantsOfIds = participants?.map((item) => item.id);
-  console.log(participantsOfIds, "participantsOfIds");
-  const userId = useSelector((state) => state.auth.id);
-  // const participantList =
-  //   participantsOfIds && participantsOfIds.length > 0
-  //     ? [userId, ...participantsOfIds]
-  //     : [userId];
-
-  const [createTime, setCreateTime] = useState({
-    fromTime: "12:00 am",
-    toTime: "1:00 am",
+  const { data: category } = useFacilitiesQuery();
+  const { data: locations } = useLocationsQuery();
+  const { data: bookedListByDate } = useBookedListByDateQuery({
+    facilityByRoomId,
+    bookedListByDate: changeDate || dayjs().format("YYYY-MM-DD"),
   });
+
+  const coordList = category?.data?.some(
+    (cats) => cats.name === facilityName && cats.needLocation === 1
+  );
+
+  const [searchParams] = useSearchParams();
+
+  const userId = useSelector((state) => state.auth.id);
+
+  function formatTime({ hour, minute, period }) {
+    const formattedHour = hour.toString().padStart(1, "0");
+    const formattedMinute = minute.toString().padStart(2, "0");
+
+    return `${formattedHour}:${formattedMinute} ${period}`;
+  }
+
+  function addOneHour({ hour, minute, period }) {
+    let newHour = hour + 1;
+    let newPeriod = period;
+
+    if (newHour === 12) {
+      newPeriod = period === "am" ? "pm" : "am";
+    } else if (newHour > 12) {
+      newHour = 1;
+    }
+
+    // Return the updated time object
+    return { hour: newHour, minute, period: newPeriod };
+  }
+
+  const endTime = addOneHour(selectedTime);
 
   const [formData, setFormData] = useState({
     title: "",
     note: "",
-    book_date: "",
-    start_time: createTime.fromTime,
-    end_time: createTime.toTime,
+    book_date: changeDate,
+    start_time: formatTime(selectedTime),
+    end_time: formatTime(endTime),
   });
 
+  const [title, setTitle] = useState();
   const [addPerson, setAddPerson] = useState([]);
   const [addGuest, setAddGuest] = useState([]);
-  const [manualGuests, setManualGuests] = useState([]);
 
   const [timeError, setTimeError] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  // const [inputField, setInputField] = useState(false);
   const [filteredPeople, setFilteredPeople] = useState(participants || []);
   const [mentionPerson, setMentionPerson] = useState();
+  const [location, setLocation] = useState([]);
+  const [locationName, setLocationName] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newLocationModal, setNewLocationModal] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationAddress, setLocationAddress] = useState("");
 
   const timeArr = timeList?.detailTime;
 
-  const parseTime = (timeString) => {
+  let parseTime = (timeString) => {
     const [time, period] = timeString.split(" ");
     const [hours, minutes] = time.split(":").map(Number);
     const hours24 = period === "PM" && hours !== 12 ? hours + 12 : hours % 12;
-    return hours24 * 60 + minutes; // Convert to minutes for easier comparison
+    return hours24 * 60 + minutes;
+  };
+
+  const timeAlreadyBooked = (startTime, endTime, existingBookings) => {
+    const startMinutes = parseTime(startTime);
+    const endMinutes = parseTime(endTime);
+
+    for (let booking of existingBookings) {
+      const existingStartMinutes = parseTime(booking.start_time);
+      const existingEndMinutes = parseTime(booking.end_time);
+
+      if (
+        (startMinutes >= existingStartMinutes &&
+          startMinutes < existingEndMinutes) ||
+        (endMinutes > existingStartMinutes &&
+          endMinutes <= existingEndMinutes) ||
+        (startMinutes <= existingStartMinutes &&
+          endMinutes >= existingEndMinutes) ||
+        (startMinutes < existingStartMinutes &&
+          endMinutes > existingStartMinutes - 15) || // Less than 15 mins before a booking
+        (startMinutes > existingEndMinutes &&
+          startMinutes < existingEndMinutes + 15)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   const handleInputChange = (e) => {
@@ -85,11 +147,26 @@ const Create = ({ facilityByRoomId, onClose }) => {
 
       if (startMinutes >= endMinutes) {
         setTimeError("Start time must be less than end time.");
+      } else if (
+        !coordList &&
+        timeAlreadyBooked(
+          name === "start_time" ? value : formData.start_time,
+          name === "end_time" ? value : formData.end_time,
+          bookedListByDate?.data || []
+        )
+      ) {
+        setTimeError("This time is already booked or does not gap 15 minutes!");
       } else {
         setTimeError("");
       }
     }
   };
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      book_date: changeDate,
+    }));
+  }, [changeDate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,26 +182,27 @@ const Create = ({ facilityByRoomId, onClose }) => {
       start_time: formData.start_time,
       end_time: formData.end_time,
       facility_id: Number(facilityByRoomId),
-      locations: [],
+      locations: coordList ? location : [],
       book_by: userId,
-      participants: addPerson.map((p) => p.id),
+      participants:
+        addPerson.length > 0
+          ? addPerson.map((p) => ({ id: p.id, is_user: p.is_user }))
+          : [{ id: userId, is_user: true }],
       guests: addGuest,
     };
 
-    console.log(bookingDetails, "bookingDetails");
-
-    const notifyerror = () => toast.error("This time is already booked!");
-    const notifysuccess = () => toast.success("Booking created successfully!");
+    // console.log(bookingDetails, "bookingDetails");
 
     try {
       const response = await createBooking(bookingDetails).unwrap();
-      console.log(response, "response....");
+
       if (response.status === false) {
         setSuccess(false);
-        notifyerror();
+        toast.error("This time is already booked!");
       } else {
         setSuccess(true);
-        notifysuccess();
+        // alert(response.message);
+        toast.success(response.message);
       }
 
       // Reset form
@@ -132,11 +210,12 @@ const Create = ({ facilityByRoomId, onClose }) => {
         title: "",
         note: "",
         book_date: "",
-        start_time: createTime.fromTime,
-        end_time: createTime.toTime,
+        start_time: "",
+        end_time: "",
       });
       setAddPerson([]);
       setAddGuest([]);
+      setLocation([]);
       // setManualGuests("");
     } catch (error) {
       if (error.status === "PARSING_ERROR") {
@@ -158,38 +237,49 @@ const Create = ({ facilityByRoomId, onClose }) => {
   );
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick);
+    if (location.length > 0) {
+      console.log("Location updated:", location);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    if (isModalOpen || newLocationModal) {
+      document.body.style.overflow = "hidden"; // Disable scrolling
+    } else {
+      document.body.style.overflow = "auto"; // Enable scrolling when modal closes
+    }
+
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.body.style.overflow = "auto"; // Cleanup on unmount
     };
-  }, [handleOutsideClick]);
+  }, [isModalOpen, newLocationModal]);
 
   return (
     <div
-      className="modal-overlay bg-white rounded-md mx-auto sm:p-6 lg:p-8 w-full max-h-[600px] overflow-y-scroll z-50 "
+      className="modal-overlay bg-white rounded-md mx-auto p-8 lg:p-8 w-full max-h-screen overflow-y-auto z-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 "
       onClick={handleOutsideClick}
     >
-      <div ref={modalRef} className="modal-content ">
-        <h2 className="text-lg sm:text-xl font-bold mb-4 text-center">
-          Create New Booking
-        </h2>
+      <div ref={modalRef} className="modal-content w-auto">
         <form onSubmit={handleSubmit}>
           {/* Title Field */}
-          <div className="mb-4">
+          <div className="mb-4 flex justify-start items-center gap-4">
+            <div className="timeIcon w-[40px] flex justify-start align-middle text-[#05445E]">
+              <MdOutlineTitle size={23} className="createTitle" />
+            </div>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border-b-[1px] border-gray-300 focus:outline-none"
-              placeholder="Enter booking title"
+              className="w-full px-3 border-b-[1px] border-gray-300 focus:outline-none"
+              placeholder="Add title"
               required
             />
           </div>
 
           {/* Time Fields */}
-          <div className="flex mb-2">
-            <div className="timeIcon w-[40px] flex justify-start align-middle text-gray-5s00">
+          <div className="flex mb-2 justify-start items-center gap-4">
+            <div className="timeIcon w-[40px] flex justify-start align-middle text-[#05445E]">
               <MdMoreTime size={21} />
             </div>
             <div className="flex gap-1 ml-1">
@@ -230,19 +320,7 @@ const Create = ({ facilityByRoomId, onClose }) => {
             <p className="text-red-500 text-sm mb-2">{timeError}</p>
           )}
 
-          {/* Date Field */}
-          <div className="mb-2">
-            <input
-              type="date"
-              name="book_date"
-              value={formData.book_date}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border-b-[1px] border-gray-300 focus:outline-none text-gray-500"
-              required
-            />
-          </div>
-
-          <section className=" w-full px-3 py-2 border-b-[1px] border-gray-300 focus:outline-none text-gray-500 mb-">
+          <section className="w-full py-2 focus:outline-none text-gray-500 mb-4">
             <AddPeople
               addPerson={addPerson}
               setAddPerson={setAddPerson}
@@ -256,79 +334,216 @@ const Create = ({ facilityByRoomId, onClose }) => {
 
           {/* Guest Field */}
 
-          <div className="mb-4">
+          <div className="mb-4 flex justify-start items-center gap-4">
+            <div className="timeIcon w-[40px] flex justify-start align-middle text-[#05445E]">
+              <AiOutlineUsergroupAdd size={21} />
+            </div>
             <input
               type="text"
               name="guests"
               value={addGuest.join(", ")} // Display as a comma-separated string
-              onChange={
-                (e) =>
-                  setAddGuest(
-                    e.target.value.split(",").map((email) => email.trim())
-                  ) // Split input into an array
+              onChange={(e) =>
+                setAddGuest(
+                  e.target.value.split(",").map((email) => email.trim())
+                )
               }
-              className="w-full px-3 py-2 border-b-[1px] border-gray-300 focus:outline-none"
-              placeholder="Enter guest emails, separated by commas"
+              className="w-full px-3 border-b-[1px] border-gray-300 focus:outline-none"
+              placeholder="Add guest emails (optional)"
             />
           </div>
 
-          {/* <div className="mb-4">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                id="guest"
-                value={manualGuests}
-                onChange={(e) => setManualGuests(e.target.value)}
-                className="flex-1 px-3 py-2 border-b-[1px] border-gray-300 focus:outline-none"
-                placeholder="Enter guest names or emails, separated by commas"
-              />
-              <button
-                type="button"
-                onClick={handleAddGuests}
-                className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 focus:ring focus:ring-green-300 focus:outline-none"
-              >
-                Add
-              </button>
-            </div>
-          </div> */}
+          {/* Location Field */}
+          {coordList && (
+            <div>
+              <div className="mb-4 flex justify-start items-center gap-4">
+                <div className="timeIcon w-[40px] flex justify-start align-middle text-[#05445E]">
+                  <MdOutlineAddLocationAlt size={21} className="createTitle" />
+                </div>
 
-          {/* <ul className="mt-2">
-            {addGuest.map((guest) => (
-              <li key={guest.id} className="text-sm text-gray-600">
-                {guest.name}
-              </li>
-            ))}
-          </ul> */}
+                <button
+                  className="flex justify-center items-center gap-2 px-4 py-1 bg-[#d4f1f4] text-[#05445E] rounded w-full"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                  Add Location
+                </button>
+              </div>
+              {isModalOpen && (
+                <div
+                  className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  <div
+                    className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <CreateGoogleMap onLocationSelect={setSelectedLocation} />
+                    <div className="flex justify-between mt-4">
+                      <div>
+                        <button
+                          className="px-4 py-1 bg-[#05445E] rounded-[5px] mr-2 text-[#d4f1f4] shadow-md"
+                          onClick={() => {
+                            setIsModalOpen(false);
+                            setNewLocationModal(true);
+                          }}
+                        >
+                          New Location
+                        </button>
+                      </div>
+                      <div>
+                        <button
+                          className="px-4 py-1 bg-[#d4f1f4] text-[#05445E] rounded-[5px] mr-2 shadow-md"
+                          onClick={() => setIsModalOpen(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="px-4 py-1 bg-[#05445E] text-[#d4f1f4] rounded-[5px] shadow-md"
+                          onClick={() => {
+                            if (selectedLocation) {
+                              setLocation((prev) => [
+                                ...prev,
+                                selectedLocation,
+                              ]);
+
+                              setIsModalOpen(false);
+                            } else {
+                              alert("Please select a location");
+                            }
+                          }}
+                          type="button"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {newLocationModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md">
+                    <NewLocation
+                      locationName={locationName}
+                      setLocationName={setLocationName}
+                      locationAddress={locationAddress}
+                      setLocationAddress={setLocationAddress}
+                      setNewLocationModal={setNewLocationModal}
+                      setLocation={setLocation}
+                      onLocationSelect={setSelectedLocation}
+                    />
+                    <div className="flex justify-end ">
+                      <button
+                        className="px-4 py-1 bg-[#d4f1f4] text-[#05445E] rounded-[5px] mr-2 shadow-md"
+                        onClick={() => setNewLocationModal(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="px-4 py-1 bg-[#05445E] text-[#d4f1f4] rounded-[5px] shadow-md"
+                        onClick={() => {
+                          setLocation((prev) => [...prev, selectedLocation]);
+                          setNewLocationModal(false);
+                        }}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {location.length > 0 && (
+                <div>
+                  {location.map((loc, index) => (
+                    <div
+                      key={index}
+                      className="ml-10 flex justify-between items-start border border-[#05445E] text-[#05445E] text-sm p-2 mb-2 bg-transparent rounded-md"
+                    >
+                      <p>{loc?.name || loc?.address}</p>
+                      <button
+                        className="ml-2"
+                        onClick={() => {
+                          // Remove the selected location
+                          setLocation((prev) =>
+                            prev.filter((_, i) => i !== index)
+                          );
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="size-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Note Field */}
           <div className="mb-2">
+            <label className="block text-gray-600 mb-1">Description</label>
             <textarea
               name="note"
               value={formData.note}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border-b-[1px] border-gray-300 focus:outline-none"
+              className="w-full px-3 py-2 border-[1px] border-gray-300 rounded-sm focus:outline-none"
               placeholder="Notes"
             ></textarea>
           </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            className={`w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:ring focus:ring-blue-300 focus:outline-none ${
-              timeError ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={isLoading || !!timeError}
-          >
-            {isLoading ? "Saving..." : "Save Booking"}
-          </button>
-
-          {isError && (
-            <p className="text-red-500 mt-4 text-center">
-              Error creating booking. Please try again.
-            </p>
-          )}
+          <div className="flex justify-end items-center gap-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-300 text-sm text-gray-600 px-4 py-2 rounded-sm hover:bg-gray-400 focus:ring focus:ring-blue-300 focus:outline-none ml-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`bg-[#05445E] text-sm text-white px-4 py-2 rounded-sm hover:bg-[#05445E]/80 focus:ring focus:ring-blue-300 focus:outline-none ${
+                timeError ? "opacity-50 cursor-not-allowed" : ""
+              } ${
+                isLoading || !!timeError
+                  ? "opacity-50 cursor-not-allowed bg-[#05445E]/50"
+                  : ""
+              }
+`}
+              disabled={isLoading || !!timeError}
+            >
+              {isLoading ? "Saving..." : "Save"}
+            </button>
+          </div>
         </form>
       </div>
+
       <ToastContainer />
     </div>
   );

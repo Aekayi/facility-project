@@ -6,12 +6,13 @@ import ProtectedRoutes from "./utils/ProtectedRoutes";
 import ChangePasswordPage from "./pages/login/ChangePasswordPage";
 import MeetingRoom from "./pages/meetingRoom/MeetingRoom";
 import PublicRoute from "./utils/PublicRoute";
+// import BookingDate from "./pages/booking-date/bookingDate";
 import BookingDate from "./pages/booking-date/BookingDate";
 
 function App() {
   return (
-    <div className="layout h-screen ">
-      <div className="container mx-auto flex flex-col justify-center items-center h-screen w-1/2 ">
+    <div className="layout h-full bg-[#d4f1f4]">
+      <div className="container mx-auto flex flex-col justify-center items-center">
         <Router future={{ v7_relativeSplatPath: true }}>
           <Routes>
             <Route

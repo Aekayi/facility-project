@@ -5,6 +5,7 @@ import { set } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { bookedRedx } from "../../apps/features/customSlice";
 import { useUserbyIdQuery } from "../../apps/features/apiSlice";
+import { MdApproval, MdCheckCircle } from "react-icons/md";
 
 const Booked = ({
   id,
@@ -21,54 +22,31 @@ const Booked = ({
   status,
   timeId,
   setCreateData,
+  defaultHeight = 50,
 }) => {
   const [time, setTime] = useState({
     fromTime: fromTime.toLowerCase(),
     toTime: toTime.toLowerCase(),
   });
-  let defaultHeight = 50;
 
   const [style, setStyle] = useState({ top: 0, height: 0 });
+  const [pastBooking, setPastBooking] = useState(false);
+  const [isUser, setIsUser] = useState(false);
+  const [isAdminApproved, setIsAdminApproved] = useState(false);
 
   const prevData = useSelector(
     (state) => state?.bookedRedx?.bookedRedxRequest?.info
   );
-  console.log(prevData, "prevData");
 
   const user = localStorage.getItem("persist:auth");
   const userData = JSON.parse(user);
   const {
-    data: adminId,
+    data: adminData,
     isLoading: adminIdLoading,
     isError: adminIdError,
   } = useUserbyIdQuery(userData?.id);
-  console.log(adminId?.data?.id, "adminId");
-
-  const approvedId = approved_by?.find((approver) => approver.id === adminId);
-  console.log(approvedId, "approvedId");
 
   let element = document.getElementById(id);
-
-  // const handelStartPosition = (time) => {
-  //   var hour = parseInt(time[1], 10);
-  //   var minute = parseInt(time[2], 10);
-  //   var period = time[3].toLowerCase();
-
-  //   if (period === "am") {
-  //     if (hour === 12) {
-  //       hour = 0;
-  //     }
-  //   } else {
-  //     if (hour !== 12) {
-  //       hour = hour + 12;
-  //     }
-  //   }
-
-  //   let startPosition = hour * defaultHeight + (minute * defaultHeight) / 60;
-  //   console.log(startPosition, "startPosition.......");
-
-  //   return startPosition;
-  // };
 
   const normalizeTime = (time) => {
     const regex = /^(\d{1,2}):(\d{2})\s*([apAP][mM])$/;
@@ -92,60 +70,74 @@ const Booked = ({
     return hour * 60 + minute; // Total minutes from midnight
   };
 
-  const calculatePosition = (
-    fromTime,
-    toTime,
-    defaultHeight,
-    containerHeight
-  ) => {
+  useEffect(() => {
+    if (book_by?.id == adminData?.data?.id) {
+      setIsUser(true);
+    }
+
+    const adminId = adminData?.data?.id;
+    if (approved_by?.some((approver) => approver.id === adminId)) {
+      setIsAdminApproved(true);
+    }
+
     const startTimeMinutes = normalizeTime(fromTime);
     const endTimeMinutes = normalizeTime(toTime);
 
-    // Calculate the positions based on the default height per hour
     const startPosition = (startTimeMinutes / 60) * defaultHeight;
-    console.log(startPosition, "startPositionnnnnnn");
-    const endPosition = (endTimeMinutes / 60) * defaultHeight;
-    console.log(endPosition, "endpositionnnnnnn");
-
-    const height = Math.max(endPosition - startPosition, 0);
-    console.log(height, "height....");
-
-    // Ensure the item stays within the container boundaries
-    // const clampedStart = Math.min(startPosition, containerHeight - height);
-    // console.log(clampedStart, "clampedStart");
-
-    return { y: startPosition, height };
-  };
-
-  useEffect(() => {
-    const container = document.querySelector(".book-create-container");
-    const containerHeight = container ? container.offsetHeight : 0;
-
-    const { y, height } = calculatePosition(
-      fromTime,
-      toTime,
-      defaultHeight,
-      containerHeight
+    const height = Math.max(
+      ((endTimeMinutes - startTimeMinutes) / 60) * defaultHeight,
+      0
     );
 
-    setStyle({ top: y, height });
-    console.log(style, "style.....");
-  }, [fromTime, toTime, defaultHeight]);
+    setStyle({
+      top: startPosition,
+      height,
+    });
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    setPastBooking(endTimeMinutes <= currentMinutes);
+  }, [fromTime, toTime, defaultHeight, book_by, approved_by, adminData]);
 
   return (
     <div
-      className="booked-item p-3 mb-2 rounded-md shadow-md flex flex-col border-l-4 border-blue-500 bg-white min-h-[52px] cursor-pointer"
+      className={`booked-item px-3 rounded-md shadow-md flex flex-col border border-[#05445E] bg-white min-h-[40px] cursor-pointer`}
       style={{
+        ...style,
         position: "absolute",
-        top: style.top - 21,
-        height: style.height,
         width: "100%",
+        boxSizing: "border-box",
+        backgroundColor:
+          status === "pending"
+            ? "#d4f1f4"
+            : status === "approved"
+            ? "#d4f1f4"
+            : isUser
+            ? "#05445E"
+            : "#fff",
       }}
     >
-      <div className="flex items-center justify-between">
-        <h4 className="font-bold text-gray-800 text-sm">{name}</h4>
+      <div className="flex justify-between items-center">
+        <h4
+          className={`font-bold  text-sm ${
+            isUser ? "text-[#d4f1f4] font-normal" : "text-[#05445E]"
+          } ${status === "pending" ? "text-black" : ""}`}
+        >
+          {name}
+        </h4>
+        {pastBooking && (
+          <MdCheckCircle
+            className={`w-4 h-4 ${
+              isUser ? "text-[#d4f1f4]" : "text-[#05445E]"
+            }`}
+            title="completed"
+          />
+        )}
       </div>
-      <p className="text-sm text-gray-600">
+      <p
+        className={`text-sm ${isUser ? "text-[#d4f1f4]" : "text-[#05445E]"}  ${
+          status === "pending" ? "text-black" : ""
+        }`}
+      >
         {fromTime} - {toTime} [{book_by.name || book_by.email || "Unknown"}]
       </p>
     </div>
