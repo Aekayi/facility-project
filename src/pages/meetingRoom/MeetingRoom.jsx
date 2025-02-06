@@ -17,13 +17,11 @@ const MeetingRoom = () => {
     isError,
     error,
   } = useFacilitynamesQuery(facilityName);
+  console.log(facilityData, "facilitydata");
   const { data: facilities } = useFacilitiesQuery();
   const facilityNames = facilities?.data?.map((facility) => facility.name);
   console.log("facilityNames", facilityNames);
 
-  // if (isLoading) {
-  //   return <Loading />;
-  // }
   if (isError) {
     return <div>Error: {error?.message || "Failed to fetch Meetingrooms"}</div>;
   }

@@ -241,7 +241,7 @@ const BookingDate = () => {
                       </label>
                     ) : (
                       <>
-                        <label className="mb-4 text-[#05445E]">
+                        <label className="mb-4 text-[#05445E] text-sm">
                           {dayjs(selectedDate).format("dddd, MMMM D")}
                         </label>
                         <div className="border-b-[1px] border-[#05445E] w-full mb-4"></div>

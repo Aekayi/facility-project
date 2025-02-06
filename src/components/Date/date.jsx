@@ -65,6 +65,15 @@ const DateList = ({
 
   const openModal = (booking, e) => {
     e.stopPropagation();
+    const now = new Date();
+    const bookingDateTime = new Date(
+      `${booking.book_date} ${booking.start_time}`
+    );
+
+    if (bookingDateTime < now) {
+      return;
+    }
+
     setSelectedBooking(booking);
     setIsModalOpen(true);
   };
@@ -102,10 +111,6 @@ const DateList = ({
     setIsModalOpen(false);
   };
 
-  // if (isLoading) {
-  //   return <p>Loading...</p>;
-  // }
-
   if (isError) {
     return <p>Failed to load booked list. Please try again later.</p>;
   }
@@ -135,13 +140,13 @@ const DateList = ({
   return (
     <>
       <div
-        className="date-layout relative w-full border-gray-800 h-[1200px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200  pt-1"
+        className="date-layout relative w-full border-gray-800 h-[1200px]  pt-1"
         onMouseMove={handleMouseMove}
       >
         <ul className="absolute w-full h-full">
           {hoveredTime && (
             <div
-              className={`absolute text-xs  rounded-md pointer-events-none p-1 z-9999`}
+              className={`absolute text-xs text-[#05445E]  rounded-md pointer-events-none p-1 z-9999`}
               style={{
                 top: isSmallScreen
                   ? `${mousePosition.y - 20}px`
@@ -171,7 +176,7 @@ const DateList = ({
                     (slotTime === currentHour && slotMinute <= currentMinute)));
 
               const displayHour =
-                slotTime > 12 ? slotTime - 12 : slotTime === 0 ? 12 : slotTime;
+                slotTime === 0 ? 12 : slotTime > 12 ? slotTime - 12 : slotTime;
               returnData.push(
                 <li
                   key={`${index}-${i}`}
@@ -187,7 +192,7 @@ const DateList = ({
                     if (!isPastTime) {
                       openCreateModal();
                       setSelectedTime({
-                        hour: amPm === "pm" ? slotTime - 12 : slotTime,
+                        hour: slotTime === 12 ? 12 : slotTime % 12,
                         minute: i * 15,
                         period: amPm,
                       });
@@ -198,14 +203,14 @@ const DateList = ({
                     <>
                       <label
                         className={`text-sm px-2 transform -translate-y-[7px] ${
-                          isPastTime ? "text-red-500" : ""
+                          isPastTime ? "text-red-500" : "text-[#05445E]"
                         }`}
                       >
                         {slot.time}
                       </label>
                       <div
                         className={`flex-1 border-b-[0.5px] ml-2 ${
-                          isPastTime ? "border-red-500" : "border-gray-300"
+                          isPastTime ? "border-red-500" : "border-[#05445E66]"
                         }`}
                       ></div>
                     </>
@@ -288,14 +293,12 @@ const DateList = ({
       )}
       {isModalOpen && (
         <div>
-          {selectedBooking ? (
+          {selectedBooking && (
             <BookingModal
               booking={selectedBooking}
               onClose={closeModal}
               onEdit={() => handleOpenEdit(selectedBooking)}
             />
-          ) : (
-            <p>No booking selected.</p>
           )}
         </div>
       )}

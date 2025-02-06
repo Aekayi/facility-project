@@ -3,7 +3,7 @@ import { useFacilityidQuery } from "../../apps/features/apiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../../components/loading/Loading";
 import LocalIcon from "../../assets/icons";
-import BookingDate from "../booking-date/bookingDate";
+import BookingDate from "../booking-date/BookingDate";
 
 const FleetById = () => {
   const navigate = useNavigate();

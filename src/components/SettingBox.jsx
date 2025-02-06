@@ -60,10 +60,10 @@ const SettingBox = () => {
               className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
               onClick={() => {
                 setIsOpen(false);
-                handleLogout();
+                navigate("/records");
               }}
             >
-              Logout
+              My Bookings
             </div>
             <div
               className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
@@ -73,6 +73,15 @@ const SettingBox = () => {
               }}
             >
               Change Password
+            </div>
+            <div
+              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              onClick={() => {
+                setIsOpen(false);
+                handleLogout();
+              }}
+            >
+              Logout
             </div>
           </div>
         )}

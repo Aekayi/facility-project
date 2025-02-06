@@ -150,7 +150,7 @@ const EditModal = ({ booking, onClose }) => {
       onClick={handleOutsideClick}
     >
       <div
-        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-screen overflow-y-auto "
         onClick={(e) => e.stopPropagation()}
       >
         {/* {updateLoading ? <Loading /> : null} */}

@@ -3,7 +3,6 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { set } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { bookedRedx } from "../../apps/features/customSlice";
 import { useUserbyIdQuery } from "../../apps/features/apiSlice";
 import { MdApproval, MdCheckCircle } from "react-icons/md";
 

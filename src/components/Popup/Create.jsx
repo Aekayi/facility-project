@@ -256,7 +256,7 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
 
   return (
     <div
-      className="modal-overlay bg-white rounded-md mx-auto p-8 lg:p-8 w-full max-h-screen overflow-y-auto z-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 "
+      className="modal-overlay bg-white rounded-md mx-auto p-8 lg:p-8 w-full max-h-screen overflow-y-auto z-50"
       onClick={handleOutsideClick}
     >
       <div ref={modalRef} className="modal-content w-auto">
@@ -271,7 +271,7 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              className="w-full px-3 border-b-[1px] border-gray-300 focus:outline-none"
+              className="w-full border-b-[1px] border-gray-300 focus:outline-none placeholder:text-gray-500"
               placeholder="Add title"
               required
             />
@@ -282,7 +282,7 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
             <div className="timeIcon w-[40px] flex justify-start align-middle text-[#05445E]">
               <MdMoreTime size={21} />
             </div>
-            <div className="flex gap-1 ml-1">
+            <div className="flex gap-1">
               <select
                 name="start_time"
                 value={formData.start_time}
@@ -347,7 +347,7 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
                   e.target.value.split(",").map((email) => email.trim())
                 )
               }
-              className="w-full px-3 border-b-[1px] border-gray-300 focus:outline-none"
+              className="w-full border-b-[1px] border-gray-300 focus:outline-none placeholder:text-gray-500"
               placeholder="Add guest emails (optional)"
             />
           </div>
@@ -528,12 +528,10 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
             </button>
             <button
               type="submit"
-              className={`bg-[#05445E] text-sm text-white px-4 py-2 rounded-sm hover:bg-[#05445E]/80 focus:ring focus:ring-blue-300 focus:outline-none ${
-                timeError ? "opacity-50 cursor-not-allowed" : ""
-              } ${
+              className={`text-sm text-white px-4 py-2 rounded-sm hover:bg-[#05445E]/80 focus:ring focus:ring-blue-300 focus:outline-none  ${
                 isLoading || !!timeError
-                  ? "opacity-50 cursor-not-allowed bg-[#05445E]/50"
-                  : ""
+                  ? "cursor-not-allowed bg-gray-400"
+                  : "bg-[#05445E] "
               }
 `}
               disabled={isLoading || !!timeError}

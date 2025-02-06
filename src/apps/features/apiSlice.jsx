@@ -90,6 +90,12 @@ export const apiSlice = createApi({
       },
       providesTags: ["Booking"],
     }),
+    bookedListByUser: builder.query({
+      query: ({ userId }) => {
+        return `/api/bookingListByUser/${userId}`;
+      },
+      providesTags: ["Booking"],
+    }),
     userbyId: builder.query({
       query: (id) => {
         return `/api/users/${id}`;
@@ -115,9 +121,9 @@ export const apiSlice = createApi({
     }),
     approvedBooking: builder.mutation({
       query: ({ bookingId, status }) => ({
-        url: `/api/bookingStatus/${bookingId}`, // Dynamic booking ID in URL
+        url: `/api/bookingStatus/${bookingId}`,
         method: "POST",
-        params: { status }, // Pass status as a query parameter
+        params: { status },
       }),
       invalidatesTags: ["Booking"],
     }),
@@ -139,6 +145,7 @@ export const {
   useCreateBookingMutation,
   useGetHolidaysQuery,
   useBookedListByDateQuery,
+  useBookedListByUserQuery,
   useDeleteBookingMutation,
   useUpdateBookingMutation,
   useApprovedBookingMutation,

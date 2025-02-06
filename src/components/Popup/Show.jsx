@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import { forwardRef, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { bookedRedx } from "../../apps/features/customSlice";
 import LocalIcon from "../../assets/icons";
 // import LoadingComponent from "../loading/LoadingComponent";
 import Modal from "@mui/material/Modal";

@@ -8,6 +8,7 @@ import MeetingRoom from "./pages/meetingRoom/MeetingRoom";
 import PublicRoute from "./utils/PublicRoute";
 // import BookingDate from "./pages/booking-date/bookingDate";
 import BookingDate from "./pages/booking-date/BookingDate";
+import BookingRecords from "./pages/BookingRecords";
 
 function App() {
   return (
@@ -56,6 +57,14 @@ function App() {
               element={
                 <ProtectedRoutes>
                   <ChangePasswordPage />
+                </ProtectedRoutes>
+              }
+            />
+            <Route
+              path="/records"
+              element={
+                <ProtectedRoutes>
+                  <BookingRecords />
                 </ProtectedRoutes>
               }
             />

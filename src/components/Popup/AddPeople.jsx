@@ -178,7 +178,7 @@ function AddPeople({
         ref={inputRef}
       >
         {isDropdownOpen && (
-          <div className="scrollbar-create py-[10px] px-[15px] border-[0.4px] border-[#05445E] rounded-lg bg-[#d4f1f4] shadow-md">
+          <div className="py-[10px] px-[15px] border-[0.4px] border-[#05445E] rounded-lg bg-[#d4f1f4] shadow-md">
             <div
               className="close-btn flex justify-end "
               onClick={() => setIsDropdownOpen(false)}
@@ -201,13 +201,12 @@ function AddPeople({
               />
             </div>
             <div
-              className="user-list-box min-h-[350px] max-h-[350px] overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200  w-full py-[5px] px-[15px] mt-[5px]"
+              className="user-list-box min-h-[350px] max-h-[350px] overflow-auto  w-full py-[5px] px-[15px] mt-[5px]"
               // style={{
               //   maxHeight:
               //     facilityFilter[0]?.needLocation == 0 ? "130px" : "190px",
               // }}
             >
-              {/* <LoadingComponent loadingGroup={"u"} design="true"> */}
               {inputValue == "" ? (
                 <div
                   className="h-[50px] flex justify-between items-center border-b-[1px] border-[#05445e66] cursor-pointer"
@@ -223,8 +222,8 @@ function AddPeople({
                     <span>All</span>
                   </div>
                   <input
-                    className="dropDownPeopleBox "
-                    id="all-CheckBox rounded-[4px] border-b-transparent"
+                    className="w-4 h-4 border-none rounded-md outline-none focus:bg-[#05445E] "
+                    id="rounded-[4px]"
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAll}
@@ -246,7 +245,7 @@ function AddPeople({
                     </span>
                   </div>
                   <input
-                    className="dropDownPeopleBox rounded-[4px]"
+                    className="w-4 h-4 border-none rounded-md outline-none focus:bg-[#05445E] "
                     type="checkbox"
                     checked={addPerson.some((p) => p.id === person.id)}
                     onChange={() => handleSelectDropDownPerson(person)}
