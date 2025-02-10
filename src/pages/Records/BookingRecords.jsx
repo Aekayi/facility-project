@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LocalIcon from "../assets/icons";
-import { useBookedListByUserQuery } from "../apps/features/apiSlice";
+import LocalIcon from "../../assets/icons";
+import { useBookedListByUserQuery } from "../../apps/features/apiSlice";
 import dayjs from "dayjs";
-import BookedRecord from "../components/BookedRecord/BookedRecord";
-import Loading from "../components/loading/Loading";
+import BookedRecord from "../../components/BookedRecord/BookedRecord";
+import Loading from "../../components/loading/Loading";
 
 function BookingRecords() {
   const navigate = useNavigate();

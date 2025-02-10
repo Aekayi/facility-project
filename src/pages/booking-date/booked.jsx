@@ -99,7 +99,7 @@ const Booked = ({
 
   return (
     <div
-      className={`booked-item px-3 rounded-md shadow-md flex flex-col border border-[#05445E] bg-white min-h-[40px] cursor-pointer`}
+      className={`booked-item px-3 rounded-md shadow-md flex flex-col border border-[#05445E] bg-white min-h-[30px] cursor-pointer`}
       style={{
         ...style,
         position: "absolute",
@@ -117,7 +117,7 @@ const Booked = ({
     >
       <div className="flex justify-between items-center">
         <h4
-          className={`font-bold  text-sm ${
+          className={`font-bold ${
             isUser ? "text-[#d4f1f4] font-normal" : "text-[#05445E]"
           } ${status === "pending" ? "text-black" : ""}`}
         >

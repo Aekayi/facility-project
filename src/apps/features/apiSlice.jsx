@@ -68,7 +68,7 @@ export const apiSlice = createApi({
     }),
 
     getBookedSlots: builder.query({
-      query: (id) => `/api/bookingListByFacility/${id}`,
+      query: ({ id }) => `/api/bookingListByFacility/${id}`,
     }),
     createBooking: builder.mutation({
       query: (bookingDetails) => ({

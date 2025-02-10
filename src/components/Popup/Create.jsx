@@ -18,9 +18,6 @@ import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import AddPeople from "./AddPeople";
 import { useParams, useSearchParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import AddLocationModal from "./AddLocationModal";
-import Loading from "../loading/Loading";
-import { AiOutlineUngroup } from "react-icons/ai";
 import NewLocation from "./NewLocation";
 import CreateGoogleMap from "./CreateGoogleMap";
 
@@ -199,10 +196,15 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
       if (response.status === false) {
         setSuccess(false);
         toast.error("This time is already booked!");
+        setTimeout(() => {
+          onClose();
+        }, 2000);
       } else {
         setSuccess(true);
-        // alert(response.message);
         toast.success(response.message);
+        setTimeout(() => {
+          onClose();
+        }, 2000);
       }
 
       // Reset form
@@ -216,7 +218,8 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
       setAddPerson([]);
       setAddGuest([]);
       setLocation([]);
-      // setManualGuests("");
+
+      // onClose();
     } catch (error) {
       if (error.status === "PARSING_ERROR") {
         console.error("Server returned invalid response:", error);
@@ -225,8 +228,8 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
       }
     }
   };
-  const modalRef = useRef(null);
 
+  const modalRef = useRef(null);
   const handleOutsideClick = useCallback(
     (e) => {
       if (modalRef.current && !modalRef.current.contains(e.target)) {
@@ -236,11 +239,11 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
     [onClose]
   );
 
-  useEffect(() => {
-    if (location.length > 0) {
-      console.log("Location updated:", location);
-    }
-  }, [location]);
+  // useEffect(() => {
+  //   if (location.length > 0) {
+  //     console.log("Location updated:", location);
+  //   }
+  // }, [location]);
 
   useEffect(() => {
     if (isModalOpen || newLocationModal) {
@@ -363,6 +366,7 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
                 <button
                   className="flex justify-center items-center gap-2 px-4 py-1 bg-[#d4f1f4] text-[#05445E] rounded w-full"
                   onClick={() => setIsModalOpen(true)}
+                  type="button"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -418,7 +422,6 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
                                 ...prev,
                                 selectedLocation,
                               ]);
-
                               setIsModalOpen(false);
                             } else {
                               alert("Please select a location");

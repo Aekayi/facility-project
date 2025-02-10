@@ -8,7 +8,8 @@ import MeetingRoom from "./pages/meetingRoom/MeetingRoom";
 import PublicRoute from "./utils/PublicRoute";
 // import BookingDate from "./pages/booking-date/bookingDate";
 import BookingDate from "./pages/booking-date/BookingDate";
-import BookingRecords from "./pages/BookingRecords";
+import BookingRecords from "./pages/Records/BookingRecords";
+import BookingsForApprove from "./pages/Records/BookingsForApprove";
 
 function App() {
   return (
@@ -65,6 +66,14 @@ function App() {
               element={
                 <ProtectedRoutes>
                   <BookingRecords />
+                </ProtectedRoutes>
+              }
+            />
+            <Route
+              path="/approver-records"
+              element={
+                <ProtectedRoutes>
+                  <BookingsForApprove />
                 </ProtectedRoutes>
               }
             />

@@ -145,7 +145,7 @@ const BookingDate = () => {
 
                 {/* Date Picker Section */}
                 <div>
-                  <div className="flex flex-row justify-between items-center w-full mt-4 mb-4 z-50">
+                  <div className="flex flex-row justify-between items-center w-full h-auto mt-4 mb-4 z-50">
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       {/* <div className="flex w-full justify-between"> */}
                       <DemoContainer
@@ -159,10 +159,9 @@ const BookingDate = () => {
                           className="w-full"
                           sx={{
                             "& .MuiOutlinedInput-root": {
-                              padding: "2px 20px",
                               overflow: "hidden",
-                              width: "100%",
-                              minWidth: "300px",
+                              width: "100%", // Ensures it takes full width of the container
+                              minWidth: "200px", // Default width for large screens
                               color: "#05445E",
 
                               "& .MuiOutlinedInput-input": {
@@ -179,11 +178,15 @@ const BookingDate = () => {
                                 borderColor: "#05445E",
                               },
                             },
-                            "@media (min-width: 768px)": {
-                              width: "320px",
+
+                            "@media (min-width: 425px)": {
+                              "& .MuiOutlinedInput-root": {
+                                minWidth: "320px", // Mobile
+                              },
                             },
                           }}
                         />
+
                         <input
                           type="hidden"
                           name="datePickerHidden"
@@ -219,7 +222,9 @@ const BookingDate = () => {
                         console.log(selectedTime, "selectedTime");
                         setIsModalOpen(true);
                       }}
-                      className="bg-[#05445E] px-2 py-1 lg:py-2 text-white text-sm rounded-md hover:bg-[#05445E]/80 mt-[6px]"
+                      className={`bg-[#05445E] px-1 md:px-2 py-1 lg:py-2 text-white text-sm rounded-md hover:bg-[#05445E]/80 mt-[6px] ${
+                        !selectedDay || holiday ? "cursor-not-allowed" : ""
+                      }`}
                     >
                       Book New
                     </button>

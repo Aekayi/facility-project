@@ -410,31 +410,7 @@
       "time": "12",
       "minute": "45",
       "period": "pm"
-    },
-    {
-      "id": 53,
-      "time": "12",
-      "minute": "00",
-      "period": "pm"
-    },
-    {
-      "id": 54,
-      "time": "12",
-      "minute": "15",
-      "period": "pm"
-    },
-    {
-      "id": 55,
-      "time": "12",
-      "minute": "30",
-      "period": "pm"
-    },
-    {
-      "id": 56,
-      "time": "12",
-      "minute": "45",
-      "period": "pm"
-    },
+    },   
     {
       "id": 57,
       "time": "1",

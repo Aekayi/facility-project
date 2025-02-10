@@ -34,6 +34,7 @@ const LoginPage = () => {
           setCredentials({
             id: response.data.user.id,
             token: response.data.token,
+            role: response.data.user.role,
           })
         );
 

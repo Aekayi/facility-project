@@ -140,13 +140,13 @@ const DateList = ({
   return (
     <>
       <div
-        className="date-layout relative w-full border-gray-800 h-[1200px]  pt-1"
+        className="date-layout relative w-full border-gray-800 h-[1200px] pt-1"
         onMouseMove={handleMouseMove}
       >
-        <ul className="absolute w-full h-full">
+        <ul className={`absolute w-full h-full`}>
           {hoveredTime && (
             <div
-              className={`absolute text-xs text-[#05445E]  rounded-md pointer-events-none p-1 z-9999`}
+              className={`absolute text-xs text-[#05445E] rounded-md pointer-events-none p-1 z-9999`}
               style={{
                 top: isSmallScreen
                   ? `${mousePosition.y - 20}px`
@@ -181,8 +181,8 @@ const DateList = ({
                 <li
                   key={`${index}-${i}`}
                   className={`min-h-[10px] flex items-start justify-between relative ${
-                    isPastTime
-                      ? " bg-red-50 opacity-50 pointer-events-none cursor-not-allowed"
+                    isPastTime || holiday || !selectedDay
+                      ? " bg-red-80 opacity-50 cursor-not-allowed"
                       : "cursor-pointer"
                   } `}
                   data-time={`${displayHour}:${slotMinute
@@ -218,6 +218,7 @@ const DateList = ({
                 </li>
               );
             }
+
             return returnData;
           })}
         </ul>
