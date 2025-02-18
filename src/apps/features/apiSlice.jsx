@@ -90,6 +90,11 @@ export const apiSlice = createApi({
       },
       providesTags: ["Booking"],
     }),
+    fleetBookedListByDate: builder.query({
+      query: ({ date }) => {
+        return `api/fleetbookingListByDate/${date}`;
+      },
+    }),
     bookedListByUser: builder.query({
       query: ({ userId }) => {
         return `/api/bookingListByUser/${userId}`;
@@ -145,6 +150,7 @@ export const {
   useCreateBookingMutation,
   useGetHolidaysQuery,
   useBookedListByDateQuery,
+  useFleetBookedListByDateQuery,
   useBookedListByUserQuery,
   useDeleteBookingMutation,
   useUpdateBookingMutation,

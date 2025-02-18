@@ -6,8 +6,8 @@ import {
   useApprovedBookingMutation,
 } from "../../apps/features/apiSlice";
 import Loading from "../loading/Loading";
-import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
   const loggedInUserId = useSelector((state) => state.auth.id);
@@ -37,16 +37,22 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
 
   const handleApproved = async (status) => {
     try {
+      console.log("Update booking status");
       await approvedBooking({ bookingId: booking.id, status }).unwrap();
-      toast.success(
-        `Booking ${status === 1 ? "approved" : "canceled"} successfully`
+      toast.info(
+        `Booking ${status === 1 ? "approved" : "canceled"} successfully`,
+        {
+          style: { backgroundColor: "#d4f1f4", color: "#05445e" },
+          progressStyle: {
+            background: "#05445e",
+          },
+        }
       );
-      alert(`Booking ${status === 1 ? "approved" : "canceled"} successfully`);
+      console.log("Toast success should display");
       setTimeout(() => {
         onClose();
       }, 2000);
     } catch (error) {
-      console.error("Error updating booking status:", error);
       toast.error("Failed to update booking status");
       setTimeout(() => {
         onClose();
@@ -85,7 +91,12 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
     try {
       await deleteBooking(booking.id).unwrap();
       setDeleteComfirm(false); // Close delete confirmation
-      toast.success("Booking deleted successfully!");
+      toast.info("Booking deleted successfully!", {
+        style: { backgroundColor: "#d4f1f4", color: "#05445e" },
+        progressStyle: {
+          background: "#05445e",
+        },
+      });
       setTimeout(() => {
         onClose();
       }, 2000);
@@ -241,7 +252,7 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
                                 className="px-2 py-1 bg-[#05445E] text-white rounded hover:bg-[#05445E]/80 transition shadow-md"
                                 onClick={() => handleApproved(1)}
                               >
-                                {approvedLoading ? "Approving..." : "Approve"}
+                                Approve
                               </button>
                               <button
                                 className="px-2 py-1 bg-[#d4f1f4] hover:bg-[#d4f1f4]/80 text-[#05445E] rounded transition shadow-md"

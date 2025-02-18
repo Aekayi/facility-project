@@ -134,13 +134,12 @@ const DateList = ({
 
     return hours; // Return only the hours for comparison
   };
-  // console.log(mousePosition.x, mousePosition.y, "mousePosition");
   const isSmallScreen = window.innerWidth <= 600;
 
   return (
     <>
       <div
-        className="date-layout relative w-full border-gray-800 h-[1200px] pt-1"
+        className="date-layout relative w-full border-gray-800 h-[1200px] pt-1 overflow-hidden"
         onMouseMove={handleMouseMove}
       >
         <ul className={`absolute w-full h-full`}>

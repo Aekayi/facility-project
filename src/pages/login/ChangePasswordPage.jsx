@@ -7,7 +7,7 @@ import SettingBox from "../../components/SettingBox";
 import LocalIcon from "../../assets/icons";
 import { clearCredentials } from "../../apps/features/AuthSlice";
 import { useDispatch } from "react-redux";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ChangePasswordPage = () => {
@@ -31,7 +31,12 @@ const ChangePasswordPage = () => {
     onSubmit: async (values, { setSubmitting }) => {
       const notifyerror = () => toast.error("This time is already booked!");
       const notifysuccess = () =>
-        toast.success("Booking created successfully!");
+        toast.info("Booking created successfully!", {
+          style: { backgroundColor: "#d4f1f4", color: "#05445e" },
+          progressStyle: {
+            background: "#05445e",
+          },
+        });
       try {
         const response = await changePassword({
           current_password: values.current_password,
@@ -67,8 +72,6 @@ const ChangePasswordPage = () => {
 
   return (
     <>
-      <ToastContainer />
-
       <div className="h-full w-2/3 max-w-md bg-white">
         <div className="m-4">
           <div className="container flex justify-between items-center py-3 px-4 mb-4 border border-gray-300 shadow rounded">

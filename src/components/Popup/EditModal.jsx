@@ -7,7 +7,7 @@ import {
 } from "../../apps/features/apiSlice";
 import { MdCategory, MdOutlineAddLocationAlt } from "react-icons/md";
 import AddPeople from "./AddPeople";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../loading/Loading";
 import { data } from "autoprefixer";
@@ -137,7 +137,12 @@ const EditModal = ({ booking, onClose }) => {
         toast.error("Error updating booking");
       } else {
         setSuccess(true);
-        toast.success("Booking updated successfully!");
+        toast.info("Booking updated successfully!", {
+          style: { backgroundColor: "#d4f1f4", color: "#05445e" },
+          progressStyle: {
+            background: "#05445e",
+          },
+        });
       }
     } catch (error) {
       console.error("Failed to update booking:", error);
@@ -497,7 +502,6 @@ const EditModal = ({ booking, onClose }) => {
           </>
         )}
       </div>
-      <ToastContainer />
     </div>
   );
 };

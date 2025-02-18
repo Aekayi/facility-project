@@ -1,10 +1,10 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
-
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { set } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { useUserbyIdQuery } from "../../apps/features/apiSlice";
-import { MdApproval, MdCheckCircle } from "react-icons/md";
+import {
+  useUserbyIdQuery,
+  useBookedListByDateQuery,
+} from "../../apps/features/apiSlice";
+import { MdCheckCircle } from "react-icons/md";
 
 const Booked = ({
   id,
@@ -23,19 +23,11 @@ const Booked = ({
   setCreateData,
   defaultHeight = 50,
 }) => {
-  const [time, setTime] = useState({
-    fromTime: fromTime.toLowerCase(),
-    toTime: toTime.toLowerCase(),
-  });
-
   const [style, setStyle] = useState({ top: 0, height: 0 });
+  const [hovered, setHovered] = useState(false);
   const [pastBooking, setPastBooking] = useState(false);
   const [isUser, setIsUser] = useState(false);
   const [isAdminApproved, setIsAdminApproved] = useState(false);
-
-  const prevData = useSelector(
-    (state) => state?.bookedRedx?.bookedRedxRequest?.info
-  );
 
   const user = localStorage.getItem("persist:auth");
   const userData = JSON.parse(user);
@@ -45,12 +37,15 @@ const Booked = ({
     isError: adminIdError,
   } = useUserbyIdQuery(userData?.id);
 
-  let element = document.getElementById(id);
+  const { data: bookedList } = useBookedListByDateQuery({
+    facilityByRoomId: facility_id?.id,
+    bookedListByDate: book_date,
+  });
+  // console.log(bookedList, "bookedList");
 
   const normalizeTime = (time) => {
     const regex = /^(\d{1,2}):(\d{2})\s*([apAP][mM])$/;
     const match = time.match(regex);
-
     if (!match) {
       console.error("Invalid time format:", time);
       return 0;
@@ -66,8 +61,42 @@ const Booked = ({
       hour = 0;
     }
 
-    return hour * 60 + minute; // Total minutes from midnight
+    return hour * 60 + minute;
   };
+
+  const overlappingBookings =
+    bookedList?.data?.filter((booking) => {
+      const startA = normalizeTime(booking.start_time);
+      const endA = normalizeTime(booking.end_time);
+      const startB = normalizeTime(fromTime);
+      const endB = normalizeTime(toTime);
+
+      return (
+        booking.book_date === book_date &&
+        !(
+          endA <= startB || // booking ends before this booking starts
+          startA >= endB
+        )
+      );
+    }) || [];
+
+  // console.log(overlappingBookings, "dfdf");
+
+  const bookingIndex = overlappingBookings.findIndex(
+    (booking) => booking.id === id
+  );
+  console.log(bookingIndex, "index");
+
+  // const widthPercentage = 100 / overlappingBookings.length;
+  // console.log(widthPercentage, "widthhhh");
+
+  const widthPercentage = overlappingBookings.length > 1 ? 50 : 100;
+
+  const leftOffset =
+    bookingIndex != 0
+      ? (bookingIndex * 50) / (overlappingBookings.length - 1)
+      : 0;
+  console.log(leftOffset, "leftOffset");
 
   useEffect(() => {
     if (book_by?.id == adminData?.data?.id) {
@@ -80,9 +109,11 @@ const Booked = ({
     }
 
     const startTimeMinutes = normalizeTime(fromTime);
+    console.log(startTimeMinutes, "startTimeMinutes");
     const endTimeMinutes = normalizeTime(toTime);
 
     const startPosition = (startTimeMinutes / 60) * defaultHeight;
+    console.log(startPosition, "startPosition");
     const height = Math.max(
       ((endTimeMinutes - startTimeMinutes) / 60) * defaultHeight,
       0
@@ -91,11 +122,26 @@ const Booked = ({
     setStyle({
       top: startPosition,
       height,
+      width: `${widthPercentage}%`,
+      left: `${leftOffset}%`,
+      position: "absolute",
+      zIndex: hovered ? 50 : 1,
+      transition: "z-index 0.2s linear",
     });
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     setPastBooking(endTimeMinutes <= currentMinutes);
-  }, [fromTime, toTime, defaultHeight, book_by, approved_by, adminData]);
+  }, [
+    fromTime,
+    toTime,
+    defaultHeight,
+    book_by,
+    approved_by,
+    adminData,
+    widthPercentage,
+    leftOffset,
+    hovered,
+  ]);
 
   return (
     <div
@@ -103,8 +149,9 @@ const Booked = ({
       style={{
         ...style,
         position: "absolute",
-        width: "100%",
+        // width: "100%",
         boxSizing: "border-box",
+        overflow: "hidden",
         backgroundColor:
           status === "pending"
             ? "#d4f1f4"
@@ -114,6 +161,8 @@ const Booked = ({
             ? "#05445E"
             : "#fff",
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <div className="flex justify-between items-center">
         <h4

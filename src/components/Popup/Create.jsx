@@ -17,9 +17,10 @@ import {
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import AddPeople from "./AddPeople";
 import { useParams, useSearchParams } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
 import NewLocation from "./NewLocation";
 import CreateGoogleMap from "./CreateGoogleMap";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
   const { facilityName } = useParams();
@@ -195,13 +196,23 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
 
       if (response.status === false) {
         setSuccess(false);
-        toast.error("This time is already booked!");
+        toast.error("This time is already booked!", {
+          style: { backgroundColor: "#d4f1f4" },
+          progressStyle: {
+            background: "red",
+          },
+        });
         setTimeout(() => {
           onClose();
         }, 2000);
       } else {
         setSuccess(true);
-        toast.success(response.message);
+        toast.info(response.message, {
+          style: { backgroundColor: "#d4f1f4", color: "#05445e" },
+          progressStyle: {
+            background: "#05445e",
+          },
+        });
         setTimeout(() => {
           onClose();
         }, 2000);
@@ -544,8 +555,6 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
           </div>
         </form>
       </div>
-
-      <ToastContainer />
     </div>
   );
 };

@@ -10,11 +10,12 @@ import PublicRoute from "./utils/PublicRoute";
 import BookingDate from "./pages/booking-date/BookingDate";
 import BookingRecords from "./pages/Records/BookingRecords";
 import BookingsForApprove from "./pages/Records/BookingsForApprove";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
     <div className="layout h-full bg-[#d4f1f4]">
-      <div className="container mx-auto flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-center items-center">
         <Router future={{ v7_relativeSplatPath: true }}>
           <Routes>
             <Route
@@ -80,6 +81,11 @@ function App() {
           </Routes>
         </Router>
       </div>
+      <ToastContainer
+        position="bottom-center"
+        hideProgressBar={false}
+        autoClose={2000}
+      />
     </div>
   );
 }

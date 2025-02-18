@@ -16,13 +16,23 @@ import Back from "./back.png";
 import BackColor from "./back_color.png";
 import Home from "./home.png";
 import CloseIcon from "./cancel.png";
-
+import Title from "./title.svg";
+import Calendar from "./calendar.svg";
+import CarIcon from "./car.svg";
+import Edit2 from "./edit-2.svg";
+import Location from "./location.svg";
+import Note from "./note.svg";
+import People from "./people.svg";
+import Profile from "./profile.svg";
+import Time from "./time.svg";
 export default {
   Logo,
   Meeting_room,
   Car,
+  CarIcon,
   Delete,
   Edit,
+  Edit2,
   Loading,
   ApproveCanceled,
   Approved,
@@ -36,4 +46,11 @@ export default {
   BackColor,
   Home,
   CloseIcon,
+  Title,
+  Calendar,
+  Location,
+  Note,
+  People,
+  Profile,
+  Time
 };

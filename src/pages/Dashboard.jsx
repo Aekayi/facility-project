@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useFacilitiesQuery } from "../apps/features/apiSlice";
 import { useNavigate } from "react-router-dom";
 import SettingBox from "../components/SettingBox";
@@ -6,17 +6,21 @@ import Loading from "../components/loading/Loading";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const { data, isLoading, isError, error } = useFacilitiesQuery();
-  // console.log(data);
-  // if (isLoading) {
-  //   return <Loading />;
-  // }
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
+
   if (isError) {
     return <div>Error: {error?.message || "Failed to fetch facilities"}</div>;
   }
   return (
     <div className="h-screen w-full max-w-md bg-white">
-      {isLoading ? (
+      {loading ? (
         <div className=" bg-white min-h-screen flex justify-center items-center">
           <Loading />
         </div>
