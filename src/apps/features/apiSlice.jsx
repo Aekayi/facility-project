@@ -65,10 +65,12 @@ export const apiSlice = createApi({
     }),
     facilitynames: builder.query({
       query: (facilityName) => `/api/facilityByCat/${facilityName}`,
+      invalidatesTags: ["Booking"],
     }),
 
     getBookedSlots: builder.query({
       query: ({ id }) => `/api/bookingListByFacility/${id}`,
+      invalidatesTags: ["Booking"],
     }),
     createBooking: builder.mutation({
       query: (bookingDetails) => ({
@@ -94,6 +96,7 @@ export const apiSlice = createApi({
       query: ({ date }) => {
         return `api/fleetbookingListByDate/${date}`;
       },
+      providesTags: ["Booking"],
     }),
     bookedListByUser: builder.query({
       query: ({ userId }) => {
@@ -132,8 +135,21 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Booking"],
     }),
+    bookingDetails: builder.query({
+      query: (bookingId) => {
+        return `/api/bookRequest/${bookingId}`;
+      },
+      invalidatesTags: ["Booking"],
+    }),
     locations: builder.query({
       query: () => `/api/locations`,
+      invalidatesTags: ["Booking"],
+    }),
+    MapLocations: builder.query({
+      query: ({ date }) => {
+        return `api/getMapViewBookingListByDate/${date}`;
+      },
+      providesTags: ["Booking"],
     }),
   }),
 });
@@ -155,5 +171,7 @@ export const {
   useDeleteBookingMutation,
   useUpdateBookingMutation,
   useApprovedBookingMutation,
+  useBookingDetailsQuery,
   useLocationsQuery,
+  useMapLocationsQuery,
 } = apiSlice;

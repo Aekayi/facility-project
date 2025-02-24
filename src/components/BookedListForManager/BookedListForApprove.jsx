@@ -13,8 +13,8 @@ function BookedListForApprove({
   participants,
   approved_by,
   status,
-  fleetIndex,
-  defaultHeight = 60,
+  left,
+  defaultHeight = 65,
 }) {
   const [style, setStyle] = useState({ top: 0, height: 0, left: 0 });
 
@@ -40,31 +40,29 @@ function BookedListForApprove({
   };
   useEffect(() => {
     const startTimeMinutes = normalizeTime(fromTime);
-    console.log(startTimeMinutes, "startTimeMinutesssss");
     const endTimeMinutes = normalizeTime(toTime);
 
     const startPosition = (startTimeMinutes / 60) * defaultHeight;
-    console.log(startPosition, "startPosition");
     const height = Math.max(
       ((endTimeMinutes - startTimeMinutes) / 60) * defaultHeight,
       0
     );
     setStyle({
-      top: startPosition + 45,
+      top: startPosition + 24,
       height,
-      left: "40px",
+      left: 40,
     });
-  }, [fromTime, toTime, fleetIndex]);
+  }, [fromTime, toTime]);
 
   return (
     <div
-      className={`px-3 rounded-md shadow-md ${
-        status === "pending" ? "bg-[#B6D26F]" : "bg-yellow-200"
+      className={`px-6 rounded-md shadow-md cursor-pointer ${
+        status === "pending" ? "bg-[#E3EEC7]" : "bg-[#B6D26F]"
       }`}
       style={{ ...style, position: "absolute" }}
     >
-      <div className="font-semibold">{name || "Booking"}</div>
-      <div className="text-sm text-gray-700">
+      <span className="font-sm">{name || "Booking"}</span>
+      <div className="text-xs text-gray-700">
         {fromTime} - {toTime}
       </div>
     </div>

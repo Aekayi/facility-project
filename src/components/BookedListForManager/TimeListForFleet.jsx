@@ -1,24 +1,58 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import timeList from "../../assets/public/time.json";
 import BookedListForApprove from "./BookedListForApprove";
-import { useFacilitynamesQuery } from "../../apps/features/apiSlice";
+import {
+  useFacilitynamesQuery,
+  useBookingDetailsQuery,
+} from "../../apps/features/apiSlice";
 
 function TimeListForFleet({
   changeDate,
   current_date,
-  current_time,
   bookedList,
+  onBookingSelect,
 }) {
+  console.log(bookedList, "bookedList");
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const {
     data: facilityNames,
     isError,
     isLoading,
   } = useFacilitynamesQuery("Fleet");
-  console.log(facilityNames?.data, "facilityNames");
-  const booked = bookedList;
+
+  const booked = Array.isArray(bookedList)
+    ? bookedList.flatMap((fleet) => fleet.data || [])
+    : [];
   console.log(booked, "bookedddd");
   const time = timeList.time;
-  const fleets = ["Ko Pyae Phyo Fleet", "Fleet 2", "Taxi"];
+
+  const bookingsByFleet = {};
+  bookedList?.forEach((item) => {
+    if (!bookingsByFleet[item.facility_id]) {
+      bookingsByFleet[item.facility_id] = [];
+    }
+    bookingsByFleet[item.facility_id].push(item);
+  });
+  console.log(bookingsByFleet, "bookingsByyy");
+
+  useEffect(() => {
+    if (!bookedList || bookedList?.length === 0) return;
+    const firstBooking = bookedList[0]?.data[0];
+    console.log(firstBooking, "firstBooking");
+
+    if (!selectedBooking && firstBooking) {
+      setSelectedBooking(firstBooking);
+      onBookingSelect(firstBooking);
+    } else {
+      setSelectedBooking(null);
+      onBookingSelect;
+    }
+  }, [changeDate, bookedList, onBookingSelect]);
+
+  const handleBookingClick = (booking) => {
+    setSelectedBooking((prev) => (prev?.id === booking.id ? prev : booking));
+    onBookingSelect(booking);
+  };
 
   const parseTimeTo24Hour = (time) => {
     const match = time.match(/^(\d{1,2})(?::(\d{2}))?\s?(AM|PM)$/i);
@@ -32,125 +66,122 @@ function TimeListForFleet({
     minutes = parseInt(minutes || "0", 10);
 
     if (period.toUpperCase() === "AM" && hours === 12) {
-      hours = 0; // Midnight case
+      hours = 0;
     } else if (period.toUpperCase() === "PM" && hours !== 12) {
-      hours += 12; // Convert PM to 24-hour format
+      hours += 12;
     }
 
-    // return hours; // Return only the hours for comparison
     return `${String(hours).padStart(2, "0")}`;
+  };
+
+  const timeToMinutes = (time) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
   };
 
   return (
     <div>
-      <div className="date-layout relative w-full border-gray-800 h-[1500px] pt-1 overflow-hidden">
-        <div className="grid grid-cols-3 text-center font-semibold ml-20">
+      <div className="date-layout relative w-full border-gray-800 h-[1600px] pt-1">
+        <div className="grid grid-cols-[50px_repeat(3,1fr)] gap-2  text-center py-2">
+          <div className="text-left px-2"></div>
           {facilityNames?.data?.map((fleet, index) => (
-            <div key={index}>{fleet?.name}</div>
+            <>
+              <div key={index} className="border-l border-gray-400 h-[1600px]">
+                {fleet?.name}
+              </div>
+              <ul className={`absolute w-full h-full mt-6 z-1`}>
+                {time?.map((slot, index) => {
+                  const returnData = [];
+                  const slotTime = parseTimeTo24Hour(slot.time);
+                  const currentHour = new Date().getHours();
+                  const currentMinute = new Date().getMinutes();
+                  const isPastDay = changeDate < current_date;
+                  for (let i = 0; i < 4; i++) {
+                    const slotMinute = String(i * 15).padStart(2, "0");
+                    const isPastTime =
+                      isPastDay ||
+                      (changeDate === current_date &&
+                        (slotTime < currentHour ||
+                          (slotTime === currentHour &&
+                            slotMinute <= currentMinute)));
+
+                    returnData.push(
+                      <li
+                        key={`${index}-${i}`}
+                        className={`min-h-[15px] flex items-start justify-between relative `}
+                      >
+                        {i === 0 ? (
+                          <>
+                            <label
+                              className={`text-sm px-2 transform -translate-y-[7px] `}
+                            >
+                              {slot.time}
+                            </label>
+                            <div
+                              className={`flex-1 border-b-[0.5px] ml-2 `}
+                            ></div>
+                          </>
+                        ) : null}
+                      </li>
+                    );
+                  }
+                  return returnData;
+                })}
+              </ul>
+              {booked
+                ?.filter((item) => item?.facility_id?.id === fleet?.id)
+                ?.map((item, index) => {
+                  if (
+                    (item?.book_date === changeDate &&
+                      item?.start_time &&
+                      item?.end_time &&
+                      item?.status === "pending") ||
+                    item?.status === "booked"
+                  ) {
+                    const fleetIndex = facilityNames?.data?.findIndex(
+                      (f) => f.id === fleet?.id
+                    );
+                    console.log(fleetIndex, "fleetIndex");
+
+                    const columnWidth = 100 / facilityNames?.data?.length;
+                    console.log(columnWidth, "columnwidth");
+                    const baseLeftPosition = `${
+                      fleetIndex * columnWidth + columnWidth / 3
+                    }`;
+                    console.log(baseLeftPosition, "baseeee");
+
+                    return (
+                      <div
+                        key={index}
+                        className={`absolute rounded-md cursor-pointer`}
+                        style={{
+                          left: `${baseLeftPosition}%`,
+                          zIndex: 30,
+                        }}
+                        onClick={() => handleBookingClick(item)}
+                      >
+                        <BookedListForApprove
+                          id={item?.id}
+                          name={item?.title}
+                          fromTime={item?.start_time}
+                          toTime={item?.end_time}
+                          note={item?.note}
+                          book_date={item?.book_date}
+                          facility_id={item?.facility_id}
+                          locations={item?.locations}
+                          book_by={item?.book_by}
+                          participants={item?.participants}
+                          approved_by={item?.approved_by}
+                          status={item?.status}
+                        />
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+            </>
           ))}
         </div>
-        <ul className={`absolute w-full h-full`}>
-          {time?.map((slot, index) => {
-            const returnData = [];
-            const slotTime = parseTimeTo24Hour(slot.time);
-            const currentHour = new Date().getHours();
-            const currentMinute = new Date().getMinutes();
-            const isPastDay = changeDate < current_date;
-            for (let i = 0; i < 4; i++) {
-              const slotMinute = String(i * 15).padStart(2, "0");
-              const isPastTime =
-                isPastDay ||
-                (changeDate === current_date &&
-                  (slotTime < currentHour ||
-                    (slotTime === currentHour && slotMinute <= currentMinute)));
-              // const displayHour =
-              //   slotTime === 0 ? 12 : slotTime > 12 ? slotTime - 12 : slotTime;
-              returnData.push(
-                <li
-                  key={`${index}-${i}`}
-                  className={`min-h-[15px] flex items-start justify-between relative `}
-                >
-                  {i === 0 ? (
-                    <>
-                      <label
-                        className={`text-sm px-2 transform -translate-y-[7px] `}
-                      >
-                        {slot.time}
-                      </label>
-                      <div className={`flex-1 border-b-[0.5px] ml-2 `}></div>
-                    </>
-                  ) : null}
-                </li>
-              );
-            }
-
-            return returnData;
-          })}
-        </ul>
-        <div className="line absolute w-[1px] left-[70px] h-[1500px] bg-slate-300"></div>
-        <div className="line absolute w-[1px] left-[290px] h-[1500px] bg-slate-300"></div>
-        <div className="line absolute w-[1px] left-[520px] h-[1500px] bg-slate-300"></div>
-        <div className="line absolute w-[1px] left-[725px] h-[1500px] bg-slate-300"></div>
-
-        {booked?.map((item, index) => {
-          if (
-            item?.book_date === changeDate &&
-            item?.start_time &&
-            item?.end_time &&
-            item?.status === "pending"
-          ) {
-            const convertToMinutes = (time) => {
-              const [hour, minute, period] = time
-                .match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i)
-                .slice(1);
-              let hours = parseInt(hour, 10);
-              let minutes = parseInt(minute, 10);
-
-              if (period.toUpperCase() === "PM" && hours !== 12) hours += 12;
-              if (period.toUpperCase() === "AM" && hours === 12) hours = 0;
-
-              return hours * 60 + minutes;
-            };
-
-            const startMinutes = convertToMinutes(item.start_time);
-            const endMinutes = convertToMinutes(item.end_time);
-            const duration = endMinutes - startMinutes;
-
-            // UI adjustments
-            const slotHeight = 14;
-            const topPosition = (startMinutes / 15) * slotHeight;
-            const bookingHeight = (duration / 15) * slotHeight;
-
-            const fleetIndex = facilityNames?.data?.filter(
-              (fleet) => fleet?.id === item?.facility_id?.id
-            );
-            console.log(
-              fleetIndex?.map((fleet) => fleet?.id),
-              "fleetindexssss"
-            );
-            // const fleetLeftPositions = [70, 290, 520];
-            return (
-              <div key={index} className="absolute rounded-md left-20">
-                <BookedListForApprove
-                  id={item?.id}
-                  name={item?.title}
-                  fromTime={item?.start_time}
-                  toTime={item?.end_time}
-                  note={item?.note}
-                  book_date={item?.book_date}
-                  facility_id={item?.facility_id}
-                  locations={item?.locations}
-                  book_by={item?.book_by}
-                  participants={item?.participants}
-                  approved_by={item?.approved_by}
-                  status={item?.status}
-                  fleetIndex={fleetIndex}
-                />
-              </div>
-            );
-          }
-          return null;
-        })}
       </div>
     </div>
   );

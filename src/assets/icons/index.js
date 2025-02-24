@@ -52,5 +52,5 @@ export default {
   Note,
   People,
   Profile,
-  Time
+  Time,
 };

@@ -9,8 +9,9 @@ import PublicRoute from "./utils/PublicRoute";
 // import BookingDate from "./pages/booking-date/bookingDate";
 import BookingDate from "./pages/booking-date/BookingDate";
 import BookingRecords from "./pages/Records/BookingRecords";
-import BookingsForApprove from "./pages/Records/BookingsForApprove";
 import { ToastContainer } from "react-toastify";
+import BookingsForApprove from "./components/BookedListForManager/BookingsForApprove";
+import ReservationMap from "./pages/ReservationMap/ReservationMap";
 
 function App() {
   return (
@@ -78,6 +79,21 @@ function App() {
                 </ProtectedRoutes>
               }
             />
+            <Route
+              path="/reservation-map"
+              element={
+                <ProtectedRoutes>
+                  <ReservationMap />
+                </ProtectedRoutes>
+              }
+            />
+            {/* <Route path="/" element={<Layout />}>
+              <Route
+                path="bookings-for-approve"
+                element={<BookingsForApprove />}
+              />
+              <Route path="reservation-map" element={<ReservationMap />} />
+            </Route> */}
           </Routes>
         </Router>
       </div>

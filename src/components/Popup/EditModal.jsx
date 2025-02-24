@@ -59,7 +59,7 @@ const EditModal = ({ booking, onClose }) => {
   };
 
   const formattedStartTime = startTime ? convertTo24HourFormat(startTime) : "";
-  const formattedEndTime = startTime ? convertTo24HourFormat(endTime) : "";
+  const formattedEndTime = endTime ? convertTo24HourFormat(endTime) : "";
 
   const [
     updateBooking,
@@ -93,7 +93,7 @@ const EditModal = ({ booking, onClose }) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setLoading(false); // Stop loading after 1 second
+      setLoading(false);
     }, 1000);
     document.addEventListener("mousedown", handleOutsideClick);
     return () => {
@@ -105,10 +105,6 @@ const EditModal = ({ booking, onClose }) => {
     .map((participant) => participant.id);
 
   const handleSave = async () => {
-    console.log(addPerson, "addPersonnnn");
-    // let participantIds = addPerson.map((person) => person.id);
-    // console.log(participantIds, "participantIdsssss");
-
     let guestEmails = guests.map((guest) => guest.email);
     console.log(guestEmails, "guestIdsaaa");
     const updatedBooking = {
