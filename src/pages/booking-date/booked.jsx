@@ -23,6 +23,7 @@ const Booked = ({
   setCreateData,
   defaultHeight = 50,
 }) => {
+  console.log(id, "iddddd");
   const [style, setStyle] = useState({ top: 0, height: 0 });
   const [hovered, setHovered] = useState(false);
   const [pastBooking, setPastBooking] = useState(false);
@@ -79,8 +80,7 @@ const Booked = ({
         )
       );
     }) || [];
-
-  // console.log(overlappingBookings, "dfdf");
+  console.log(overlappingBookings, id, "overlappingBookings");
 
   const bookingIndex = overlappingBookings.findIndex(
     (booking) => booking.id === id

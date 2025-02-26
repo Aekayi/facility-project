@@ -26,15 +26,6 @@ function TimeListForFleet({
   console.log(booked, "bookedddd");
   const time = timeList.time;
 
-  const bookingsByFleet = {};
-  bookedList?.forEach((item) => {
-    if (!bookingsByFleet[item.facility_id]) {
-      bookingsByFleet[item.facility_id] = [];
-    }
-    bookingsByFleet[item.facility_id].push(item);
-  });
-  console.log(bookingsByFleet, "bookingsByyy");
-
   useEffect(() => {
     if (!bookedList || bookedList?.length === 0) return;
     const firstBooking = bookedList[0]?.data[0];
@@ -86,10 +77,13 @@ function TimeListForFleet({
           <div className="text-left px-2"></div>
           {facilityNames?.data?.map((fleet, index) => (
             <>
-              <div key={index} className="border-l border-gray-400 h-[1600px]">
+              <div
+                key={index}
+                className="border-l border-gray-400 h-[1600px] z-1"
+              >
                 {fleet?.name}
               </div>
-              <ul className={`absolute w-full h-full mt-6 z-1`}>
+              <ul className={`absolute w-full h-full mt-6`}>
                 {time?.map((slot, index) => {
                   const returnData = [];
                   const slotTime = parseTimeTo24Hour(slot.time);
@@ -118,7 +112,7 @@ function TimeListForFleet({
                               {slot.time}
                             </label>
                             <div
-                              className={`flex-1 border-b-[0.5px] ml-2 `}
+                              className={`flex-1 border-b-[0.5px] border-gray-400 ml-2 `}
                             ></div>
                           </>
                         ) : null}
@@ -130,7 +124,7 @@ function TimeListForFleet({
               </ul>
               {booked
                 ?.filter((item) => item?.facility_id?.id === fleet?.id)
-                ?.map((item, index) => {
+                ?.map((item, index, facilityBookings) => {
                   if (
                     (item?.book_date === changeDate &&
                       item?.start_time &&
@@ -143,25 +137,24 @@ function TimeListForFleet({
                     );
                     console.log(fleetIndex, "fleetIndex");
 
-                    const columnWidth = 100 / facilityNames?.data?.length;
-                    console.log(columnWidth, "columnwidth");
+                    const columnWidth = 90 / facilityNames?.data?.length;
                     const baseLeftPosition = `${
                       fleetIndex * columnWidth + columnWidth / 3
                     }`;
-                    console.log(baseLeftPosition, "baseeee");
-
                     return (
                       <div
                         key={index}
                         className={`absolute rounded-md cursor-pointer`}
                         style={{
                           left: `${baseLeftPosition}%`,
-                          zIndex: 30,
+                          // zIndex: 30,
+                          width: `${columnWidth - 10}%`,
                         }}
                         onClick={() => handleBookingClick(item)}
                       >
                         <BookedListForApprove
                           id={item?.id}
+                          bookedId={booked?.map((item) => item?.id)}
                           name={item?.title}
                           fromTime={item?.start_time}
                           toTime={item?.end_time}
@@ -173,6 +166,8 @@ function TimeListForFleet({
                           participants={item?.participants}
                           approved_by={item?.approved_by}
                           status={item?.status}
+                          bookings={facilityBookings}
+                          facilityNames={facilityNames}
                         />
                       </div>
                     );

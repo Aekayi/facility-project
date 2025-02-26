@@ -12,17 +12,29 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 import duration from "../../assets/public/duration.json";
 import { toast } from "react-toastify";
+import timeList from "../../assets/public/time.json";
 
 function EditFleetInMap({ selectedBookingId, onClose }) {
+  const timeArr = timeList.detailTime;
   const { data: bookingDetails, refetch } =
     useBookingDetailsQuery(selectedBookingId);
 
   const { data: facilitiyNames } = useFacilitynamesQuery("Fleet");
   console.log(facilitiyNames, "facilitiyNames");
   const durationTime = duration?.duration;
-  const [startTime, setStartTime] = useState(bookingDetails?.start_time);
+  const [startTime, setStartTime] = useState(
+    bookingDetails?.start_time
+      ?.replace("PM", "pm")
+      .replace("AM", "am")
+      .replace(/^0/, "")
+  );
   console.log(startTime, "ssssssssssss");
-  const [endTime, setEndTime] = useState(bookingDetails?.end_time);
+  const [endTime, setEndTime] = useState(
+    bookingDetails?.end_time
+      ?.replace("PM", "pm")
+      .replace("AM", "am")
+      .replace(/^0/, "")
+  );
   const [selectedDate, setSelectedDate] = useState("");
   console.log(selectedDate, "selectedDate");
 
@@ -90,8 +102,18 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
   useEffect(() => {
     if (bookingDetails) {
       setSelectedDate(bookingDetails?.book_date);
-      setStartTime(convertTo24Hour(bookingDetails?.start_time || ""));
-      setEndTime(convertTo24Hour(bookingDetails?.end_time || ""));
+      setStartTime(
+        bookingDetails?.start_time
+          ?.replace("PM", "pm")
+          .replace("AM", "am")
+          .replace(/^0/, "") || ""
+      );
+      setEndTime(
+        bookingDetails?.end_time
+          ?.replace("PM", "pm")
+          .replace("AM", "am")
+          .replace(/^0/, "") || ""
+      );
       setSelectedFacility(bookingDetails?.facility_id?.id);
     }
   }, [bookingDetails]);
@@ -113,8 +135,8 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
       title: bookingDetails?.title,
       note: bookingDetails?.note,
       book_date: selectedDate || bookingDetails?.book_date,
-      start_time: convertTo12Hour(startTime),
-      end_time: convertTo12Hour(endTime),
+      start_time: startTime.replace("pm", "PM").replace("am", "AM"),
+      end_time: endTime.replace("pm", "PM").replace("am", "AM"),
       facility_id: selectedFacility || bookingDetails?.facility_id?.id,
       departure_transport: departure ? true : false,
       return_transport: returnTransport ? true : false,
@@ -187,6 +209,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           value={bookingDetails?.facility_id?.name}
           // onChange={(e) => setTitle(e.target.value)}
           className="border-b border-gray-300 w-full focus:outline-none text-gray-500 placeholder:text-gray-400 text-[20px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -195,6 +218,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="text"
           value={bookingDetails?.title}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -203,6 +227,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="text"
           value={`Booked By: ${bookingDetails?.book_by?.name || ""}`}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-800 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -211,6 +236,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="text"
           value={bookingDetails?.locations?.map((location) => location.name)}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-start space-x-2">
@@ -232,6 +258,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="text"
           value={bookingDetails?.note}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -240,24 +267,44 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="appearance-none bg-white border border-gray-300 text-gray-800 rounded-md py-[6px] pl-3 pr-10 focus:outline-none cursor-pointer text-[13px]"
+          className="appearance-none bg-white border border-gray-500 text-gray-800 rounded-md py-[6px] p-2 focus:outline-none cursor-pointer text-[13px]"
         />
       </div>
+
       <div className="mb-4 flex flex-row items-center space-x-2">
         <img src={LocalIcon.Time} alt="" />
-        <div className="flex space-x-4">
-          <input
-            type="time"
+        <div className="flex gap-1">
+          <select
+            name="start_time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
-            className="border border-gray-300 rounded w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[13px]"
-          />
-          <input
-            type="time"
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+          >
+            {timeArr.map((time, key) => (
+              <option
+                value={`${time.time}:${time.minute} ${time.period}`}
+                key={key}
+              >
+                {time.time}:{time.minute} {time.period}
+              </option>
+            ))}
+          </select>
+          <label>-</label>
+          <select
+            name="end_time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
-            className="border border-gray-300 rounded w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[13px]"
-          />
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+          >
+            {timeArr.map((time, key) => (
+              <option
+                value={`${time.time}:${time.minute} ${time.period}`}
+                key={key}
+              >
+                {time.time}:{time.minute} {time.period}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="mb-4 flex flex-row items-start space-x-2">

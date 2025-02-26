@@ -88,10 +88,9 @@ function ListsInMap() {
                           justify-content: space-between;
                           font-size: 12px;
                           font-weight: bold;
-                          padding: 5px;
+                          padding: 8px;
                           white-space: nowrap;
                           ">
-                          <p>${location.name}</p>
                           <p>${booking.start_time} to ${booking.end_time}</p>
                           </div>
                       `,

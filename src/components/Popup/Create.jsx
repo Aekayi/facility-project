@@ -23,6 +23,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
+  console.log(selectedTime, "selectedTime");
   const { facilityName } = useParams();
   const dispatch = useDispatch();
   const [createBooking, { isLoading, isError, isSuccess }] =

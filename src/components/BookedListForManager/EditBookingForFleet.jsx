@@ -10,6 +10,7 @@ import {
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { set } from "date-fns";
 
 function EditBookingForFleet({
   fleetBookedList,
@@ -17,11 +18,21 @@ function EditBookingForFleet({
   setSelectedBooking,
 }) {
   const timeArr = timeList?.detailTime;
-  console.log(timeArr, "timearr");
   const durationTime = duration?.duration;
 
-  const [startTime, setStartTime] = useState(selectedBooking?.start_time);
-  const [endTime, setEndTime] = useState(selectedBooking?.end_time);
+  const [startTime, setStartTime] = useState(
+    selectedBooking?.start_time
+      ?.replace("PM", "pm")
+      .replace("AM", "am")
+      .replace(/^0/, "")
+  );
+  console.log(startTime, "startTime");
+  const [endTime, setEndTime] = useState(
+    selectedBooking?.end_time
+      ?.replace("PM", "pm")
+      .replace("AM", "am")
+      .replace(/^0/, "")
+  );
   const [selectedDate, setSelectedDate] = useState("");
   const [departure, setDeparture] = useState(true);
   const [departureDuration, setDepatureDuration] = useState("1:00");
@@ -45,7 +56,6 @@ function EditBookingForFleet({
     );
     setReturnTransport(hasReturn);
     const Approved = selectedBooking?.status === "booked";
-    console.log(Approved, "approved");
     setApprove(Approved);
 
     const remark = selectedBooking?.locations?.find((r) => r.remark);
@@ -73,22 +83,21 @@ function EditBookingForFleet({
     }
   }, [selectedBooking]);
 
-  const convertTo24Hour = (time) => {
-    if (!time) return "";
-    console.log(dayjs(time, "h:mm A").format("HH:mm"), "timeeee");
-    return dayjs(time, "h:mm A").format("HH:mm"); // Converts to 24-hour format
-  };
-
-  const convertTo12Hour = (time) => {
-    if (!time) return "";
-    return dayjs(time, "HH:mm").format("h:mm A"); // Converts to 12-hour format
-  };
-
   useEffect(() => {
     if (selectedBooking) {
       setSelectedDate(selectedBooking.book_date || "");
-      setStartTime(convertTo24Hour(selectedBooking.start_time || ""));
-      setEndTime(convertTo24Hour(selectedBooking.end_time || ""));
+      setStartTime(
+        selectedBooking?.start_time
+          ?.replace("PM", "pm")
+          .replace("AM", "am")
+          .replace(/^0/, "") || ""
+      );
+      setEndTime(
+        selectedBooking?.end_time
+          ?.replace("PM", "pm")
+          .replace("AM", "am")
+          .replace(/^0/, "") || ""
+      );
       setSelectedFacility(selectedBooking.facility_id?.id || "");
     }
   }, [selectedBooking]);
@@ -102,7 +111,6 @@ function EditBookingForFleet({
 
     return selectedDateTime.isBefore(now); // Check if booking is in the past
   };
-  console.log(isPastBooking, "isPastBooking");
 
   const [
     updateBooking,
@@ -119,8 +127,8 @@ function EditBookingForFleet({
       title: selectedBooking?.title,
       note: selectedBooking?.note,
       book_date: selectedDate || selectedBooking?.book_date,
-      start_time: convertTo12Hour(startTime),
-      end_time: convertTo12Hour(endTime),
+      start_time: startTime.replace("pm", "PM").replace("am", "AM"),
+      end_time: endTime.replace("pm", "PM").replace("am", "AM"),
       facility_id: selectedFacility || selectedBooking?.facility_id?.id,
       departure_transport: departure ? true : false,
       return_transport: returnTransport ? true : false,
@@ -147,8 +155,8 @@ function EditBookingForFleet({
       console.log("Booking updated successfully:", response);
       setShowSuccessModal(true);
 
-      setStartTime(convertTo24Hour(updatedData.start_time));
-      setEndTime(convertTo24Hour(updatedData.end_time));
+      setStartTime(updatedData.start_time);
+      setEndTime(updatedData.end_time);
       setSelectedFacility(updatedData.facility_id);
       setSelectedDate(updatedData.book_date);
       setDeparture(updatedData.departure_transport);
@@ -197,6 +205,7 @@ function EditBookingForFleet({
           value={selectedBooking?.facility_id?.name}
           // onChange={(e) => setTitle(e.target.value)}
           className="border-b border-gray-300 w-full focus:outline-none text-gray-500 placeholder:text-gray-400 text-[20px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -205,6 +214,7 @@ function EditBookingForFleet({
           type="text"
           value={selectedBooking?.title}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -213,6 +223,7 @@ function EditBookingForFleet({
           type="text"
           value={`Booked By: ${selectedBooking?.book_by?.name || ""}`}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-800 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -221,6 +232,7 @@ function EditBookingForFleet({
           type="text"
           value={selectedBooking?.locations?.map((location) => location.name)}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-start space-x-2">
@@ -242,6 +254,7 @@ function EditBookingForFleet({
           type="text"
           value={selectedBooking?.note}
           className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -250,24 +263,43 @@ function EditBookingForFleet({
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="appearance-none bg-white border border-gray-300 text-gray-800 rounded-md py-[6px] pl-3 pr-10 focus:outline-none cursor-pointer text-[13px]"
+          className="appearance-none bg-white border border-gray-500 text-gray-800 rounded-md p-2 focus:outline-none cursor-pointer text-[13px]"
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
         <img src={LocalIcon.Time} alt="" />
-        <div className="flex space-x-4">
-          <input
-            type="time"
+        <div className="flex gap-1">
+          <select
+            name="start_time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
-            className="border border-gray-300 rounded w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[13px]"
-          />
-          <input
-            type="time"
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+          >
+            {timeArr.map((time, key) => (
+              <option
+                value={`${time.time}:${time.minute} ${time.period}`}
+                key={key}
+              >
+                {time.time}:{time.minute} {time.period}
+              </option>
+            ))}
+          </select>
+          <label>-</label>
+          <select
+            name="end_time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
-            className="border border-gray-300 rounded w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[13px]"
-          />
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+          >
+            {timeArr.map((time, key) => (
+              <option
+                value={`${time.time}:${time.minute} ${time.period}`}
+                key={key}
+              >
+                {time.time}:{time.minute} {time.period}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="mb-4 flex flex-row items-start space-x-2">
@@ -435,7 +467,7 @@ function EditBookingForFleet({
           <button
             className="bg-[#86E4AE] px-[10px] py-2 w-full rounded-[6px]"
             onClick={handleUpdateBooking}
-            disabled={updateLoading || isPastBooking()}
+            disabled={updateLoading}
           >
             {updateLoading ? "Saving..." : "Save"}
           </button>

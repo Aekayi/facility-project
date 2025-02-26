@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   useFacilitynamesQuery,
   useFleetBookedListByDateQuery,
@@ -11,10 +12,10 @@ import weblogo from "../../assets/weblogo.png";
 import calendar from "../../assets/calendar.png";
 import location from "../../assets/map-route.png";
 import EditBookingForFleet from "./EditBookingForFleet";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import TimeListForFleet from "./TimeListForFleet";
+import LocalIcon from "../../assets/icons";
 
 dayjs.extend(isSameOrAfter);
 
@@ -139,9 +140,9 @@ function BookingsForApprove() {
               </div>
 
               {/* Right Column */}
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <div className="flex flex-row justify-between items-center w-full h-auto mt-4 mb-4 z-50">
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="bg-white p-4 rounded-lg shadow-lg">
+                <div className="flex flex-row justify-start items-center w-full h-auto mb-4 gap-2">
+                  {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer
                       components={["DatePicker"]}
                       className="h-[20px]"
@@ -153,8 +154,25 @@ function BookingsForApprove() {
                         className="w-full"
                       />
                     </DemoContainer>
-                  </LocalizationProvider>
+                  </LocalizationProvider> */}
+                  <img
+                    src={LocalIcon.Calendar}
+                    alt="Calendar"
+                    width={40}
+                    height={40}
+                  />
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={handleDateChange}
+                    dateFormat="d, MMM yyyy"
+                    customInput={
+                      <input className="bg-transparent outline-none cursor-pointer" />
+                    }
+                    popperClassName="custom-datepicker"
+                  />
                 </div>
+                <div className="border-t border-gray-800 mb-4"></div>
+
                 <div className="h-screen overflow-y-auto">
                   <TimeListForFleet
                     bookedList={FleetBookedList || []}

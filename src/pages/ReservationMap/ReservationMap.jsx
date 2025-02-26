@@ -132,7 +132,7 @@ function ReservationMap() {
           </aside>
 
           {/* Page Content */}
-          <div className="flex justify-center items-center p-4 w-full">
+          <div className="flex justify-center items-center px-4 w-full">
             <ListsInMap />
           </div>
         </div>
