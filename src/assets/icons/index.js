@@ -24,6 +24,7 @@ import Location from "./location.svg";
 import Note from "./note.svg";
 import People from "./people.svg";
 import Profile from "./profile.svg";
+import ManagerProfile from "./profile.png";
 import Time from "./time.svg";
 export default {
   Logo,
@@ -52,5 +53,6 @@ export default {
   Note,
   People,
   Profile,
+  ManagerProfile,
   Time,
 };

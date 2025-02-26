@@ -71,7 +71,6 @@ function BookedListForApprove({
       }
     }
 
-    // Calculate top position for departure
     const departureTop =
       startPosition - (departureDuration / 60) * defaultHeight;
     console.log(departureTop, "departureTop");
@@ -88,10 +87,10 @@ function BookedListForApprove({
           parseInt(match[1], 10) * 60 + (parseInt(match[2], 10) || 0);
       }
     }
-
-    // Calculate top position for arrival
+    const startPositionForArrival = (endTimeMinutes / 60) * defaultHeight;
     const arrivalTop =
-      (endTimeMinutes / 60) * defaultHeight +
+      startPositionForArrival -
+      (arrivalDuration / 60) * defaultHeight +
       (arrivalDuration / 60) * defaultHeight;
 
     const overlappingBookings =
@@ -102,11 +101,7 @@ function BookedListForApprove({
         const endB = normalizeTime(toTime);
 
         return (
-          booking.book_date === book_date &&
-          !(
-            endA <= startB || // booking ends before this booking starts
-            startA >= endB
-          )
+          booking.book_date === book_date && !(endA <= startB || startA >= endB)
         );
       }) || [];
     console.log(overlappingBookings, id, "overlappingBookings");
@@ -146,24 +141,31 @@ function BookedListForApprove({
     <div>
       {/* Booking details */}
       <div>
-        {locations?.some((d) => d?.departure_transport === 1) && (
-          <div
-            className="absolute  left-1/2 transform -translate-x-1/2 text-xs text-gray-700 bg-white bg-opacity-90 px-1 border border-b-0 border-dashed border-gray-400 rounded-lg rounded-b-none w-full"
-            style={{
-              top: style.departureTop + 24,
-              height: style.top - style.departureTop,
-              borderLeft: "2px dashed gray", // Vertical line
-              borderRight: "2px dashed gray",
-              borderTop: "2px dashed gray",
-              width: "100%",
-            }}
-          >
-            {`Departure: ${locations
-              ?.map((d) => d?.departure_time_format)
-              .filter(Boolean)
-              .join(", ")}`}
-          </div>
-        )}
+        {locations?.some((d) => d?.departure_transport === 1) &&
+          status === "booked" && (
+            <div
+              className="absolute  text-xs text-gray-700 bg-white bg-opacity-90 px-1 border border-b-0 border-dashed border-gray-400 rounded-[15px] rounded-b-none w-full"
+              style={{
+                top: style.departureTop + 24,
+                height: style.top - style.departureTop,
+                borderLeft: "2px dashed gray", // Vertical line
+                borderRight: "2px dashed gray",
+                borderTop: "2px dashed gray",
+                width: style.width,
+                left: style.left,
+                zIndex: style.zIndex,
+                boxShadow: style.boxShadow,
+                transition: style.transition,
+              }}
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
+              <p>{`Departure: ${locations
+                ?.map((d) => d?.departure_time_format)
+                .filter(Boolean)
+                .join(", ")}`}</p>
+            </div>
+          )}
       </div>
       <div
         className={`px-2
@@ -182,23 +184,36 @@ function BookedListForApprove({
         </div>
       </div>
       <div>
-        {locations?.some((d) => d?.return_transport === 1) && (
-          <div
-            className="absolute left-1/2 transform -translate-x-1/2 text-xs text-gray-700 bg-white bg-opacity-90 px-1 py-1  border border-dashed border-t-0 border-gray-400 rounded-lg rounded-t-none w-full "
-            style={{
-              top: style.arrivalTop,
-              borderLeft: "2px dashed gray",
-              borderRight: "2px dashed gray",
-              borderBottom: "2px solid gray",
-              width: "100%",
-            }}
-          >
-            {`Arrival: ${locations
-              ?.map((d) => d?.return_time_format)
-              .filter(Boolean)
-              .join(", ")}`}
-          </div>
-        )}
+        {locations?.some((d) => d?.return_transport === 1) &&
+          status === "booked" && (
+            <div
+              className="absolute text-xs text-gray-700 bg-white bg-opacity-90  py-1 border border-dashed border-t-0 border-gray-400 rounded-[15px] rounded-t-none w-full "
+              style={{
+                top: style.arrivalTop,
+                height: style.top - style.departureTop,
+                borderLeft: "2px dashed gray",
+                borderRight: "2px dashed gray",
+                borderBottom: "2px dashed gray",
+                width: style.width,
+                left: style.left,
+                zIndex: style.zIndex,
+                boxShadow: style.boxShadow,
+                transition: style.transition,
+              }}
+            >
+              <p
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                }}
+              >{`Arrival: ${locations
+                ?.map((d) => d?.return_time_format)
+                .filter(Boolean)
+                .join(", ")}`}</p>
+            </div>
+          )}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import {
   useFacilitynamesQuery,
   useFleetBookedListByDateQuery,
+  useUsersQuery,
 } from "../../apps/features/apiSlice";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -65,6 +66,16 @@ function BookingsForApprove() {
     date: formatDate(selectedDate),
   });
 
+  const {
+    data: users,
+    isLoading: userLoading,
+    isError: userError,
+  } = useUsersQuery("users");
+  console.log(
+    users?.data?.map((user) => user?.id),
+    "users"
+  );
+
   useEffect(() => {
     console.log("Fetching data for date:", formatDate(selectedDate));
     setBookedListByDate(formatDate(selectedDate));
@@ -80,9 +91,25 @@ function BookingsForApprove() {
   return (
     <>
       <div className="flex flex-col h-full w-full">
-        <div className="flex justify-start items-center space-x-4 px-4 py-4 bg-white shadow-lg">
-          <img src={weblogo} alt="" srcset="" width="110px" height="39.93px" />
-          <h3 className="text-xl font-semibold">Booking Management</h3>
+        <div className="flex justify-between items-center space-x-4 px-4 py-4 bg-white shadow-lg">
+          <div className="flex justify-start items-center">
+            <img
+              src={weblogo}
+              alt=""
+              srcset=""
+              width="110px"
+              height="39.93px"
+            />
+            <h3 className="text-xl font-semibold">Booking Management</h3>
+          </div>
+          <div className="flex justify-start items-center">
+            <span>U Aung</span>
+            <img
+              src={LocalIcon.ManagerProfile}
+              alt=""
+              className="cursor-pointer"
+            />
+          </div>
         </div>
         <div className="flex-1 flex">
           {/* Sidebar */}
