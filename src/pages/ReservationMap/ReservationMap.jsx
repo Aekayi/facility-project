@@ -12,6 +12,8 @@ import calendar from "../../assets/calendar.png";
 import location from "../../assets/map-route.png";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import ListsInMap from "../../components/BookedListForManager/ListsInMap";
+import ProfileSetting from "../../components/BookedListForManager/ProfileSetting";
+import { useSelector } from "react-redux";
 
 dayjs.extend(isSameOrAfter);
 
@@ -81,12 +83,28 @@ function ReservationMap() {
     ? FleetBookedList.flatMap((fleet) => fleet.data || [])
     : [];
 
+  const loginUser = useSelector((state) => state.auth.role);
+  console.log(loginUser, "loginUser");
+  const username = loginUser[0]?.name;
+
   return (
     <>
       <div className="flex flex-col h-full min-h-screen w-full">
-        <div className="flex justify-start items-center space-x-4 px-4 py-4 bg-white shadow-lg">
-          <img src={weblogo} alt="" srcset="" width="110px" height="39.93px" />
-          <h3 className="text-xl font-semibold">Reservation Map</h3>
+        <div className="flex justify-between items-center px-4 bg-white shadow-lg">
+          <div className="flex justify-start items-center gap-2">
+            <img
+              src={weblogo}
+              alt=""
+              srcset=""
+              width="110px"
+              height="39.93px"
+            />
+            <h3 className="text-xl font-semibold">Reservation In Map</h3>
+          </div>
+          <div className="flex justify-start items-center gap-2">
+            <span>{username}</span>
+            <ProfileSetting />
+          </div>
         </div>
         <div className="flex-1 flex">
           {/* Sidebar */}

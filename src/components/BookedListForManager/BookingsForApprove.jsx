@@ -17,6 +17,8 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import TimeListForFleet from "./TimeListForFleet";
 import LocalIcon from "../../assets/icons";
+import { useSelector } from "react-redux";
+import ProfileSetting from "./ProfileSetting";
 
 dayjs.extend(isSameOrAfter);
 
@@ -33,6 +35,7 @@ function BookingsForApprove() {
   const [bookedListByDate, setBookedListByDate] = useState(
     dayjs(selectedDate).format("YYYY-MM-DD")
   );
+  const [isOpen, setIsOpen] = useState(false);
   const formatDate = (date) => {
     return dayjs(date).format("YYYY-MM-DD");
   };
@@ -70,11 +73,11 @@ function BookingsForApprove() {
     data: users,
     isLoading: userLoading,
     isError: userError,
-  } = useUsersQuery("users");
-  console.log(
-    users?.data?.map((user) => user?.id),
-    "users"
-  );
+  } = useUsersQuery();
+
+  const loginUser = useSelector((state) => state.auth.role);
+  console.log(loginUser, "loginUser");
+  const username = loginUser[0]?.name;
 
   useEffect(() => {
     console.log("Fetching data for date:", formatDate(selectedDate));
@@ -91,8 +94,8 @@ function BookingsForApprove() {
   return (
     <>
       <div className="flex flex-col h-full w-full">
-        <div className="flex justify-between items-center space-x-4 px-4 py-4 bg-white shadow-lg">
-          <div className="flex justify-start items-center">
+        <div className="flex justify-between items-center px-4 bg-white shadow-lg">
+          <div className="flex justify-start items-center gap-2">
             <img
               src={weblogo}
               alt=""
@@ -102,13 +105,9 @@ function BookingsForApprove() {
             />
             <h3 className="text-xl font-semibold">Booking Management</h3>
           </div>
-          <div className="flex justify-start items-center">
-            <span>U Aung</span>
-            <img
-              src={LocalIcon.ManagerProfile}
-              alt=""
-              className="cursor-pointer"
-            />
+          <div className="flex justify-start items-center gap-2">
+            <span>{username}</span>
+            <ProfileSetting />
           </div>
         </div>
         <div className="flex-1 flex">

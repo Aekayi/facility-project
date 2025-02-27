@@ -20,8 +20,7 @@ function BookedListForApprove({
   defaultHeight = 65,
 }) {
   console.log(bookings, "bookings");
-  // const depature = locations?.map((d) => d?.departure_time_format);
-  // console.log(depature, "depature");
+
   const [style, setStyle] = useState({
     top: 0,
     height: 0,
@@ -136,6 +135,7 @@ function BookedListForApprove({
     Math.abs(style.top - style.arrivalTop),
     "style.top-style.arrivalTop"
   );
+  console.log(style.top - style.departureTop, "styleeeee");
 
   return (
     <div>
@@ -160,10 +160,10 @@ function BookedListForApprove({
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
             >
-              <p>{`Departure: ${locations
+              {`Departure: ${locations
                 ?.map((d) => d?.departure_time_format)
                 .filter(Boolean)
-                .join(", ")}`}</p>
+                .join(", ")}`}
             </div>
           )}
       </div>
@@ -189,8 +189,8 @@ function BookedListForApprove({
             <div
               className="absolute text-xs text-gray-700 bg-white bg-opacity-90  py-1 border border-dashed border-t-0 border-gray-400 rounded-[15px] rounded-t-none w-full "
               style={{
-                top: style.arrivalTop,
-                height: style.top - style.departureTop,
+                top: style.arrivalTop + 24,
+                height: style.top - style.departureTop - 24,
                 borderLeft: "2px dashed gray",
                 borderRight: "2px dashed gray",
                 borderBottom: "2px dashed gray",
@@ -208,10 +208,12 @@ function BookedListForApprove({
                   left: "50%",
                   transform: "translateX(-50%)",
                 }}
-              >{`Arrival: ${locations
-                ?.map((d) => d?.return_time_format)
-                .filter(Boolean)
-                .join(", ")}`}</p>
+              >
+                {`Arrival: ${locations
+                  ?.map((d) => d?.return_time_format)
+                  .filter(Boolean)
+                  .join(", ")}`}
+              </p>
             </div>
           )}
       </div>
