@@ -152,8 +152,11 @@ function EditBookingForFleet({
         data: updatedData,
         bookingId: selectedBooking?.id,
       }).unwrap();
-      console.log("Booking updated successfully:", response);
-      setShowSuccessModal(true);
+      if (response?.status === false) {
+        alert(response?.message);
+      } else {
+        setShowSuccessModal(true);
+      }
 
       setStartTime(updatedData.start_time);
       setEndTime(updatedData.end_time);
