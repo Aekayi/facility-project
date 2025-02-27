@@ -467,7 +467,7 @@ function EditBookingForFleet({
           <button
             className="bg-[#86E4AE] px-[10px] py-2 w-full rounded-[6px]"
             onClick={handleUpdateBooking}
-            disabled={updateLoading || isPastBooking()}
+            disabled={updateLoading}
           >
             {updateLoading ? "Saving..." : "Save"}
           </button>
