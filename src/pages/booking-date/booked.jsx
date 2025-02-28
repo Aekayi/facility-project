@@ -23,7 +23,7 @@ const Booked = ({
   setCreateData,
   defaultHeight = 50,
 }) => {
-  console.log(id, "iddddd");
+  console.log(locations, "locations");
   const [style, setStyle] = useState({ top: 0, height: 0 });
   const [hovered, setHovered] = useState(false);
   const [pastBooking, setPastBooking] = useState(false);
@@ -113,15 +113,51 @@ const Booked = ({
     const endTimeMinutes = normalizeTime(toTime);
 
     const startPosition = (startTimeMinutes / 60) * defaultHeight;
+    const endPosition = (endTimeMinutes / 60) * defaultHeight;
     console.log(startPosition, "startPosition");
     const height = Math.max(
       ((endTimeMinutes - startTimeMinutes) / 60) * defaultHeight,
       0
     );
 
+    let departureDuration = 0;
+    const departureTimes = locations
+      ?.map((d) => d?.departure_time_format)
+      .filter(Boolean);
+
+    if (departureTimes?.length > 0) {
+      const match = departureTimes[0].match(/(\d+)\s*hr\s*(\d*)/);
+      if (match) {
+        departureDuration =
+          parseInt(match[1], 10) * 60 + (parseInt(match[2], 10) || 0);
+      }
+    }
+
+    const departureTop =
+      startPosition - (departureDuration / 60) * defaultHeight;
+    console.log(departureTop, "departureTop");
+
+    let arrivalDuration = 0;
+    const arrivalTimes = locations
+      ?.map((d) => d?.return_time_format)
+      .filter(Boolean);
+
+    if (arrivalTimes?.length > 0) {
+      const match = arrivalTimes[0].match(/(\d+)\s*hr\s*(\d*)/);
+      if (match) {
+        arrivalDuration =
+          parseInt(match[1], 10) * 60 + (parseInt(match[2], 10) || 0);
+      }
+    }
+    const arrivalTop = endPosition;
+    const arrivalHeight = (arrivalDuration / 60) * defaultHeight;
+
     setStyle({
       top: startPosition,
       height,
+      departureTop,
+      arrivalTop,
+      arrivalHeight,
       width: `${widthPercentage}%`,
       left: `${leftOffset}%`,
       position: "absolute",
@@ -144,51 +180,124 @@ const Booked = ({
   ]);
 
   return (
-    <div
-      className={`booked-item px-3 rounded-md shadow-md flex flex-col border border-[#05445E] bg-white min-h-[30px] cursor-pointer`}
-      style={{
-        ...style,
-        position: "absolute",
-        // width: "100%",
-        boxSizing: "border-box",
-        overflow: "hidden",
-        backgroundColor:
-          status === "pending"
-            ? "#d4f1f4"
-            : status === "approved"
-            ? "#d4f1f4"
-            : isUser
-            ? "#05445E"
-            : "#fff",
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <div className="flex justify-between items-center">
-        <h4
-          className={`font-bold ${
-            isUser ? "text-[#d4f1f4] font-normal" : "text-[#05445E]"
-          } ${status === "pending" ? "text-black" : ""}`}
-        >
-          {name}
-        </h4>
-        {pastBooking && (
-          <MdCheckCircle
-            className={`w-4 h-4 ${
-              isUser ? "text-[#d4f1f4]" : "text-[#05445E]"
-            }`}
-            title="completed"
-          />
-        )}
+    <>
+      <div>
+        {locations?.some((d) => d?.departure_transport === 1) &&
+          status === "booked" && (
+            <div
+              className="absolute  text-xs text-gray-700 bg-white bg-opacity-90 px-1 border border-b-0 border-dashed border-gray-400 rounded-[15px] rounded-b-none w-full shadow-md"
+              style={{
+                top: style.departureTop,
+                height: style.top - style.departureTop,
+                borderLeft: "2px dashed gray",
+                borderRight: "2px dashed gray",
+                borderTop: "2px dashed gray",
+                width: style.width,
+                left: style.left,
+                zIndex: style.zIndex,
+                boxShadow: style.boxShadow,
+                transition: style.transition,
+              }}
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
+              <p
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "20px",
+                  transform: "translateY(-50%)",
+                }}
+              >
+                {`Departure: ${locations
+                  ?.map((d) => d?.departure_time_format)
+                  .filter(Boolean)
+                  .join(", ")}`}
+              </p>
+            </div>
+          )}
       </div>
-      <p
-        className={`text-sm ${isUser ? "text-[#d4f1f4]" : "text-[#05445E]"}  ${
-          status === "pending" ? "text-black" : ""
-        }`}
+      <div
+        className={`booked-item px-3 rounded-md shadow-md flex flex-col border border-[#05445E] bg-white min-h-[30px] cursor-pointer`}
+        style={{
+          ...style,
+          position: "absolute",
+          boxSizing: "border-box",
+          overflow: "hidden",
+          backgroundColor:
+            status === "pending"
+              ? "#d4f1f4"
+              : status === "approved"
+              ? "#d4f1f4"
+              : isUser
+              ? "#05445E"
+              : "#fff",
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        {fromTime} - {toTime} [{book_by.name || book_by.email || "Unknown"}]
-      </p>
-    </div>
+        <div className="flex justify-between items-center">
+          <h4
+            className={`font-bold ${
+              isUser ? "text-[#d4f1f4] font-normal" : "text-[#05445E]"
+            } ${status === "pending" ? "text-black" : ""}`}
+          >
+            {name}
+          </h4>
+          {pastBooking && (
+            <MdCheckCircle
+              className={`w-4 h-4 ${
+                isUser ? "text-[#d4f1f4]" : "text-[#05445E]"
+              }`}
+              title="completed"
+            />
+          )}
+        </div>
+        <p
+          className={`text-sm ${
+            isUser ? "text-[#d4f1f4]" : "text-[#05445E]"
+          }  ${status === "pending" ? "text-black" : ""}`}
+        >
+          {fromTime} - {toTime} [{book_by.name || book_by.email || "Unknown"}]
+        </p>
+      </div>
+      <div>
+        {locations?.some((d) => d?.return_transport === 1) &&
+          status === "booked" && (
+            <div
+              className="absolute text-xs text-gray-700 bg-white bg-opacity-90  py-1 border border-dashed border-t-0 border-gray-400 rounded-[15px] rounded-t-none w-full"
+              style={{
+                top: style.arrivalTop,
+                height: style.arrivalHeight,
+                borderLeft: "2px dashed gray",
+                borderRight: "2px dashed gray",
+                borderBottom: "2px dashed gray",
+                width: style.width,
+                left: style.left,
+                zIndex: style.zIndex,
+                boxShadow: style.boxShadow,
+                transition: style.transition,
+              }}
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
+              <p
+                style={{
+                  position: "absolute",
+                  bottom: "50%",
+                  transform: "translateY(50%)",
+                  left: "20px",
+                }}
+              >
+                {`Arrival: ${locations
+                  ?.map((d) => d?.return_time_format)
+                  .filter(Boolean)
+                  .join(", ")}`}
+              </p>
+            </div>
+          )}
+      </div>
+    </>
   );
 };
 

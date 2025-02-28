@@ -320,14 +320,28 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
                 onChange={handleInputChange}
                 className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-sm p-1 focus:outline-[#757575] text-gray-500"
               >
-                {timeArr.map((time, key) => (
-                  <option
-                    value={`${time.time}:${time.minute} ${time.period}`}
-                    key={key}
-                  >
-                    {time.time}:{time.minute} {time.period}
-                  </option>
-                ))}
+                {timeArr
+                  .filter((time) => {
+                    const startIndex = timeArr.findIndex(
+                      (t) =>
+                        `${t.time}:${t.minute} ${t.period}` ===
+                        formData.start_time
+                    );
+                    const currentIndex = timeArr.findIndex(
+                      (t) =>
+                        `${t.time}:${t.minute} ${t.period}` ===
+                        `${time.time}:${time.minute} ${time.period}`
+                    );
+                    return currentIndex > startIndex;
+                  })
+                  .map((time, key) => (
+                    <option
+                      value={`${time.time}:${time.minute} ${time.period}`}
+                      key={key}
+                    >
+                      {time.time}:{time.minute} {time.period}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>

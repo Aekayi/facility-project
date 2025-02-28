@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useMapLocationsQuery } from "../../apps/features/apiSlice";
 import dayjs from "dayjs";
@@ -7,12 +6,17 @@ import LocalIcon from "../../assets/icons";
 import MapPin from "../../assets/map-pin.png";
 import ApprovedMapPin from "../../assets/approved-map-pin.png";
 import EditFleetInMap from "../Popup/EditFleetInMap";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { IconButton, Stack } from "@mui/material";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
 function ListsInMap() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(dayjs(new Date()));
   const formatDate = (date) => {
     return dayjs(date).format("YYYY-MM-DD");
   };
@@ -24,7 +28,14 @@ function ListsInMap() {
   } = useMapLocationsQuery({
     date: formatDate(selectedDate),
   });
-  console.log(mapLocations, "mapLocations");
+
+  const handlePrevDay = () => {
+    setSelectedDate((prev) => prev.subtract(1, "day"));
+  };
+
+  const handleNextDay = () => {
+    setSelectedDate((prev) => prev.add(1, "day"));
+  };
 
   useEffect(() => {
     // Load Google Maps script dynamically
@@ -125,17 +136,42 @@ function ListsInMap() {
       )}
 
       {/* Date Picker */}
-      <div className="flex justify-center items-center absolute top-14 left-2 z-10 bg-white rounded-md shadow px-4 py-2 gap-4">
+      <div className="flex justify-center items-center absolute top-14 left-2 z-10 bg-white rounded-md shadow p-2">
         <img src={LocalIcon.Calendar} alt="Calendar" width={40} height={40} />
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
-          dateFormat="d, MMM yyyy"
-          customInput={
-            <input className="bg-transparent outline-none cursor-pointer" />
-          }
-          popperClassName="custom-datepicker"
-        />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Stack direction="row" alignItems="center">
+            <DatePicker
+              value={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              format="DD, MMM YYYY"
+              sx={{
+                "& .MuiOutlinedInput-notchedOutline": {
+                  border: "none",
+                },
+                "& .MuiInputAdornment-root": {
+                  display: "none",
+                },
+                "& .MuiOutlinedInput-root": {
+                  padding: "2px",
+                  width: "120px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  border: "none",
+                },
+                "& .MuiInputBase-root": {
+                  height: "20px",
+                  minWidth: "100px",
+                },
+              }}
+            />
+            <IconButton onClick={handlePrevDay}>
+              <ChevronLeft />
+            </IconButton>
+            <IconButton onClick={handleNextDay}>
+              <ChevronRight />
+            </IconButton>
+          </Stack>
+        </LocalizationProvider>
       </div>
     </div>
   );

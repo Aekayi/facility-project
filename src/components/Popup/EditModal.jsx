@@ -13,8 +13,11 @@ import Loading from "../loading/Loading";
 import { data } from "autoprefixer";
 import GoogleMapComponent from "./GoogleMapComponent";
 import NewLocation from "./NewLocation";
+import LocalIcon from "../../assets/icons";
+import timeList from "../../assets/public/time.json";
 
 const EditModal = ({ booking, onClose }) => {
+  const timeArr = timeList?.detailTime;
   const { facilityByRoomId, facilityName } = useParams();
 
   const coordList =
@@ -26,8 +29,19 @@ const EditModal = ({ booking, onClose }) => {
   const [facility, setFacility] = useState(booking?.facility_id?.id || "");
   const [title, setTitle] = useState(booking?.title || "");
   const [note, setNote] = useState(booking?.note || "");
-  const [startTime, setStartTime] = useState(booking?.start_time || "");
-  const [endTime, setEndTime] = useState(booking?.end_time || "");
+  const [startTime, setStartTime] = useState(
+    booking?.start_time
+      ?.replace("PM", "pm")
+      .replace("AM", "am")
+      .replace(/^0/, "") || ""
+  );
+  console.log(startTime, "startTime");
+  const [endTime, setEndTime] = useState(
+    booking?.end_time
+      ?.replace("PM", "pm")
+      .replace("AM", "am")
+      .replace(/^0/, "") || ""
+  );
   const [selectedDate, setSelectedDate] = useState(booking?.book_date || "");
   const [participants, setParticipants] = useState(booking?.participants || []);
   const [guests, setGuests] = useState(booking?.guests || []);
@@ -44,22 +58,23 @@ const EditModal = ({ booking, onClose }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [location, setLocation] = useState(booking?.locations || "");
 
-  const convertTo24HourFormat = (time12h) => {
-    const [time, modifier] = time12h.split(" ");
-    let [hours, minutes] = time.split(":");
+  // const convertTo24HourFormat = (time12h) => {
+  //   const [time, modifier] = time12h.split(" ");
+  //   let [hours, minutes] = time.split(":");
 
-    if (modifier === "PM" && hours !== "12") {
-      hours = parseInt(hours, 10) + 12;
-    }
-    if (modifier === "AM" && hours === "12") {
-      hours = "00";
-    }
+  //   if (modifier === "PM" && hours !== "12") {
+  //     hours = parseInt(hours, 10) + 12;
+  //   }
+  //   if (modifier === "AM" && hours === "12") {
+  //     hours = "00";
+  //   }
 
-    return `${hours}:${minutes}`;
-  };
+  //   return `${hours}:${minutes}`;
+  // };
 
-  const formattedStartTime = startTime ? convertTo24HourFormat(startTime) : "";
-  const formattedEndTime = endTime ? convertTo24HourFormat(endTime) : "";
+  // const formattedStartTime = startTime ? convertTo24HourFormat(startTime) : "";
+  // console.log(formattedStartTime, "formattedStartTime");
+  // const formattedEndTime = endTime ? convertTo24HourFormat(endTime) : "";
 
   const [
     updateBooking,
@@ -224,7 +239,7 @@ const EditModal = ({ booking, onClose }) => {
                 ))}
               </select>
             </div>
-            <div className="mb-6 flex flex-row items-center space-x-6">
+            <div className="flex flex-row items-center mb-6 space-x-6">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -237,19 +252,50 @@ const EditModal = ({ booking, onClose }) => {
                   clipRule="evenodd"
                 />
               </svg>
-              <div className="flex space-x-4">
-                <input
-                  type="time"
-                  value={formattedStartTime}
+              <div className="flex gap-1">
+                <select
+                  name="start_time"
+                  value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="border-b border-gray-300 rounded w-full focus:outline-none text-gray-500 placeholder:text-gray-400"
-                />
-                <input
-                  type="time"
-                  value={formattedEndTime}
+                  className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+                >
+                  {timeArr.map((time, key) => (
+                    <option
+                      value={`${time.time}:${time.minute} ${time.period}`}
+                      key={key}
+                    >
+                      {time.time}:{time.minute} {time.period}
+                    </option>
+                  ))}
+                </select>
+                <label>-</label>
+                <select
+                  name="end_time"
+                  value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="border-b border-gray-300 rounded w-full focus:outline-none text-gray-500 placeholder:text-gray-400"
-                />
+                  className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+                >
+                  {timeArr
+                    .filter((time) => {
+                      const startIndex = timeArr.findIndex(
+                        (t) => `${t.time}:${t.minute} ${t.period}` === startTime
+                      );
+                      const currentIndex = timeArr.findIndex(
+                        (t) =>
+                          `${t.time}:${t.minute} ${t.period}` ===
+                          `${time.time}:${time.minute} ${time.period}`
+                      );
+                      return currentIndex > startIndex; // Only show times after start time
+                    })
+                    .map((time, key) => (
+                      <option
+                        value={`${time.time}:${time.minute} ${time.period}`}
+                        key={key}
+                      >
+                        {time.time}:{time.minute} {time.period}
+                      </option>
+                    ))}
+                </select>
               </div>
             </div>
             <section

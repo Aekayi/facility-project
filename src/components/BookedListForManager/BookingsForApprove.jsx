@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
-import DatePicker from "react-datepicker";
+// import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {
   useFacilitynamesQuery,
@@ -15,6 +15,10 @@ import location from "../../assets/map-route.png";
 import EditBookingForFleet from "./EditBookingForFleet";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { IconButton, Stack } from "@mui/material";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import TimeListForFleet from "./TimeListForFleet";
 import LocalIcon from "../../assets/icons";
 import { useSelector } from "react-redux";
@@ -42,6 +46,13 @@ function BookingsForApprove() {
   const handleDateChange = (newDate) => {
     setSelectedDate(newDate);
     setBookedListByDate(formatDate(newDate));
+  };
+  const handlePrevDay = () => {
+    setSelectedDate((prev) => prev.subtract(1, "day"));
+  };
+
+  const handleNextDay = () => {
+    setSelectedDate((prev) => prev.add(1, "day"));
   };
   let current_date = formatDate(new Date());
   console.log(current_date, "current_date");
@@ -117,7 +128,7 @@ function BookingsForApprove() {
               <NavLink
                 to="/approver-records"
                 className={({ isActive }) =>
-                  `block rounded p-2 transition ${
+                  `block rounded-lg p-2 transition ${
                     isActive
                       ? "bg-white shadow-md"
                       : "hover:bg-white hover:shadow-md"
@@ -135,7 +146,7 @@ function BookingsForApprove() {
               <NavLink
                 to="/reservation-map"
                 className={({ isActive }) =>
-                  `block rounded p-2 transition ${
+                  `block rounded-lg p-2 transition ${
                     isActive
                       ? "bg-white shadow-md"
                       : "hover:bg-white hover:shadow-md"
@@ -167,35 +178,47 @@ function BookingsForApprove() {
 
               {/* Right Column */}
               <div className="bg-white p-4 rounded-lg shadow-lg">
-                <div className="flex flex-row justify-start items-center w-full h-auto mb-4 gap-2">
-                  {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer
-                      components={["DatePicker"]}
-                      className="h-[20px]"
-                    >
-                      <DatePicker
-                        label="Choose Date"
-                        value={selectedDate}
-                        onChange={handleDateChange}
-                        className="w-full"
-                      />
-                    </DemoContainer>
-                  </LocalizationProvider> */}
+                <div className="flex flex-row justify-start items-center w-full h-auto gap-2">
                   <img
                     src={LocalIcon.Calendar}
                     alt="Calendar"
                     width={40}
                     height={40}
                   />
-                  <DatePicker
-                    selected={selectedDate}
-                    onChange={handleDateChange}
-                    dateFormat="d, MMM yyyy"
-                    customInput={
-                      <input className="bg-transparent outline-none cursor-pointer" />
-                    }
-                    popperClassName="custom-datepicker"
-                  />
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <Stack direction="row" alignItems="center">
+                      <DatePicker
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        format="DD, MMM YYYY"
+                        sx={{
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            border: "none",
+                          },
+                          // "& .MuiInputAdornment-root": {
+                          //   display: "none",
+                          // },
+                          "& .MuiOutlinedInput-root": {
+                            padding: "2px",
+                            width: "160px",
+                          },
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            border: "none",
+                          },
+                          "& .MuiInputBase-root": {
+                            height: "20px",
+                            minWidth: "100px",
+                          },
+                        }}
+                      />
+                      <IconButton onClick={handlePrevDay}>
+                        <ChevronLeft />
+                      </IconButton>
+                      <IconButton onClick={handleNextDay}>
+                        <ChevronRight />
+                      </IconButton>
+                    </Stack>
+                  </LocalizationProvider>
                 </div>
                 <div className="border-t border-gray-800 mb-4"></div>
 

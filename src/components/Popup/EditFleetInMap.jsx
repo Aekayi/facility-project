@@ -7,9 +7,9 @@ import {
   useDeleteBookingMutation,
 } from "../../apps/features/apiSlice";
 import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
+// import customParseFormat from "dayjs/plugin/customParseFormat";
 
-dayjs.extend(customParseFormat);
+// dayjs.extend(customParseFormat);
 import duration from "../../assets/public/duration.json";
 import { toast } from "react-toastify";
 import timeList from "../../assets/public/time.json";
@@ -28,7 +28,6 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
       .replace("AM", "am")
       .replace(/^0/, "")
   );
-  console.log(startTime, "ssssssssssss");
   const [endTime, setEndTime] = useState(
     bookingDetails?.end_time
       ?.replace("PM", "pm")
@@ -88,17 +87,6 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
     }
   }, [bookingDetails]);
 
-  const convertTo24Hour = (time) => {
-    if (!time) return "";
-    console.log(dayjs(time, "h:mm A").format("HH:mm"), "timeeee");
-    return dayjs(time, "h:mm A").format("HH:mm"); // Converts 12-hour format to 24-hour format
-  };
-
-  const convertTo12Hour = (time) => {
-    if (!time) return "";
-    return dayjs(time, "HH:mm").format("h:mm A"); // Converts to 12-hour format
-  };
-
   useEffect(() => {
     if (bookingDetails) {
       setSelectedDate(bookingDetails?.book_date);
@@ -117,8 +105,6 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
       setSelectedFacility(bookingDetails?.facility_id?.id);
     }
   }, [bookingDetails]);
-  console.log(startTime, "startTime.....");
-  console.log(endTime, "endTime.....");
 
   const [
     updateBooking,
@@ -167,8 +153,8 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
         onClose();
       }, 3000);
 
-      setStartTime(convertTo24Hour(updatedData.start_time));
-      setEndTime(convertTo24Hour(updatedData.end_time));
+      setStartTime(updatedData.start_time);
+      setEndTime(updatedData.end_time);
       setSelectedFacility(updatedData.facility_id);
       setSelectedDate(updatedData.book_date);
       setDeparture(updatedData.departure_transport);
@@ -183,7 +169,8 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
     }
   };
 
-  const [deleteBooking] = useDeleteBookingMutation();
+  const [deleteBooking, { isLoading: deleteLoading, isError: deleteError }] =
+    useDeleteBookingMutation();
 
   const confirmDelete = async () => {
     try {
@@ -208,7 +195,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="text"
           value={bookingDetails?.facility_id?.name}
           // onChange={(e) => setTitle(e.target.value)}
-          className="border-b border-gray-300 w-full focus:outline-none text-gray-500 placeholder:text-gray-400 text-[20px]"
+          className="border-b border-[#454545] w-full focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 text-[20px]"
           readOnly
         />
       </div>
@@ -217,25 +204,28 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
         <input
           type="text"
           value={bookingDetails?.title}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          className="w-full focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 text-[14px]"
           readOnly
         />
       </div>
+
       <div className="mb-4 flex flex-row items-center space-x-2">
         <img src={LocalIcon.Profile} alt="" />
-        <input
-          type="text"
-          value={`Booked By: ${bookingDetails?.book_by?.name || ""}`}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-800 text-[14px]"
-          readOnly
-        />
+        <div
+          contentEditable={false} // Prevent editing
+          className="w-full focus:outline-none text-[#05445E] text-[14px]"
+          style={{ cursor: "default" }} // To indicate it is read-only
+        >
+          <span style={{ color: "black" }}>Booked By: </span>
+          <span>{bookingDetails?.book_by?.name || ""}</span>
+        </div>
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
         <img src={LocalIcon.Location} alt="" />
         <input
           type="text"
           value={bookingDetails?.locations?.map((location) => location.name)}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          className="w-full focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 text-[14px]"
           readOnly
         />
       </div>
@@ -257,7 +247,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
         <input
           type="text"
           value={bookingDetails?.note}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          className="w-full focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 text-[14px]"
           readOnly
         />
       </div>
@@ -267,7 +257,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="appearance-none bg-white border border-gray-500 text-gray-800 rounded-md py-[6px] p-2 focus:outline-none cursor-pointer text-[13px]"
+          className="appearance-none bg-white border border-[#454545] text-[#0E0E0E] rounded-md py-[6px] p-2 focus:outline-none cursor-pointer text-[13px]"
         />
       </div>
 
@@ -278,7 +268,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
             name="start_time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
-            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-2 focus:outline-none text-[#0E0E0E] text-[14px]"
           >
             {timeArr.map((time, key) => (
               <option
@@ -292,18 +282,30 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           <label>-</label>
           <select
             name="end_time"
-            value={endTime}
+            value={endTime || ""}
             onChange={(e) => setEndTime(e.target.value)}
-            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-2 focus:outline-none text-[#0E0E0E] text-[14px]"
           >
-            {timeArr.map((time, key) => (
-              <option
-                value={`${time.time}:${time.minute} ${time.period}`}
-                key={key}
-              >
-                {time.time}:{time.minute} {time.period}
-              </option>
-            ))}
+            {timeArr
+              .filter((time) => {
+                const startIndex = timeArr.findIndex(
+                  (t) => `${t.time}:${t.minute} ${t.period}` === startTime
+                );
+                const currentIndex = timeArr.findIndex(
+                  (t) =>
+                    `${t.time}:${t.minute} ${t.period}` ===
+                    `${time.time}:${time.minute} ${time.period}`
+                );
+                return currentIndex > startIndex; // Only show times after start time
+              })
+              .map((time, key) => (
+                <option
+                  value={`${time.time}:${time.minute} ${time.period}`}
+                  key={key}
+                >
+                  {time.time}:{time.minute} {time.period}
+                </option>
+              ))}
           </select>
         </div>
       </div>
@@ -314,7 +316,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
             Ferry
           </label>
           <select
-            className="border border-gray-300 rounded-lg focus:outline-none text-gray-800 placeholder:text-gray-400 px-4 py-[6px] pr-4 mt-2 text-[12px]"
+            className="border border-[#454545] rounded-lg focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 px-4 py-[6px] pr-4 mt-2 text-[12px]"
             value={selectedFacility}
             onChange={(e) => setSelectedFacility(e.target.value)}
           >
@@ -337,7 +339,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           />
           <label
             htmlFor="departure"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Departure
           </label>
@@ -345,7 +347,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
         <div className="flex justify-start items-center gap-2">
           <label
             htmlFor="departure-duration"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Duration
           </label>
@@ -353,7 +355,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
             name="departure-duration"
             value={departureDuration}
             onChange={(e) => setDepatureDuration(e.target.value)}
-            className="custom-dropdown overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-md p-1 focus:outline-none text-gray-500 text-[13px]"
+            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
@@ -374,7 +376,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           />
           <label
             htmlFor="departure"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Arrival
           </label>
@@ -382,7 +384,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
         <div className="flex justify-start items-center gap-2">
           <label
             htmlFor="arrival-duration"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Duration
           </label>
@@ -390,7 +392,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
             name="arrival-duration"
             value={arrivalDuration}
             onChange={(e) => setArrivalDuration(e.target.value)}
-            className="custom-dropdown overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-md p-1 focus:outline-none text-gray-500 text-[13px]"
+            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
@@ -411,7 +413,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           />
           <label
             htmlFor="departure"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Approve
           </label>
@@ -423,7 +425,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           type="textarea"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="border border-gray-300 rounded-md w-full focus:outline-none p-2 text-gray-700 text-[13px]"
+          className="border border-[#454545] rounded-md w-full focus:outline-none p-2 text-[#0E0E0E] text-[13px]"
         >
           Remark
         </textarea>
@@ -460,8 +462,9 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
                   <button
                     onClick={confirmDelete}
                     className="px-6 py-2 w-full bg-[#FF7878] rounded"
+                    disabled={deleteLoading}
                   >
-                    Delete
+                    {deleteLoading ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
@@ -472,8 +475,9 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           <button
             className="bg-[#86E4AE] px-[10px] py-2 w-full rounded-[6px]"
             onClick={handleUpdateBooking}
+            disabled={updateLoading}
           >
-            Save
+            {updateLoading ? "Saving..." : "Save"}
           </button>
           {showSuccessModal && (
             <div

@@ -26,7 +26,6 @@ function EditBookingForFleet({
       .replace("AM", "am")
       .replace(/^0/, "")
   );
-  console.log(startTime, "startTime");
   const [endTime, setEndTime] = useState(
     selectedBooking?.end_time
       ?.replace("PM", "pm")
@@ -102,15 +101,15 @@ function EditBookingForFleet({
     }
   }, [selectedBooking]);
 
-  const isPastBooking = () => {
-    const now = dayjs(); // Current date & time
-    const selectedDateTime = dayjs(
-      `${selectedDate} ${startTime}`,
-      "YYYY-MM-DD HH:mm"
-    );
+  // const isPastBooking = () => {
+  //   const now = dayjs(); // Current date & time
+  //   const selectedDateTime = dayjs(
+  //     `${selectedDate} ${startTime}`,
+  //     "YYYY-MM-DD HH:mm"
+  //   );
 
-    return selectedDateTime.isBefore(now); // Check if booking is in the past
-  };
+  //   return selectedDateTime.isBefore(now); // Check if booking is in the past
+  // };
 
   const [
     updateBooking,
@@ -154,6 +153,7 @@ function EditBookingForFleet({
       }).unwrap();
       if (response?.status === false) {
         alert(response?.message);
+        setShowSuccessModal(false);
       } else {
         setShowSuccessModal(true);
       }
@@ -207,7 +207,7 @@ function EditBookingForFleet({
           type="text"
           value={selectedBooking?.facility_id?.name}
           // onChange={(e) => setTitle(e.target.value)}
-          className="border-b border-gray-300 w-full focus:outline-none text-gray-500 placeholder:text-gray-400 text-[20px]"
+          className="border-b border-[#454545] text-[#0E0E0E] w-full focus:outline-none  placeholder:text-gray-400 text-[20px]"
           readOnly
         />
       </div>
@@ -216,25 +216,28 @@ function EditBookingForFleet({
         <input
           type="text"
           value={selectedBooking?.title}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          className="w-full focus:outline-none  text-[#0E0E0E] placeholder:text-gray-400 text-[14px]"
           readOnly
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
         <img src={LocalIcon.Profile} alt="" />
-        <input
-          type="text"
-          value={`Booked By: ${selectedBooking?.book_by?.name || ""}`}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-800 text-[14px]"
-          readOnly
-        />
+        <div
+          contentEditable={false} // Prevent editing
+          className="w-full focus:outline-none text-[#05445E] text-[14px]"
+          style={{ cursor: "default" }} // To indicate it is read-only
+        >
+          <span style={{ color: "black" }}>Booked By: </span>
+          <span>{selectedBooking?.book_by?.name || ""}</span>
+        </div>
       </div>
+
       <div className="mb-4 flex flex-row items-center space-x-2">
         <img src={LocalIcon.Location} alt="" />
         <input
           type="text"
           value={selectedBooking?.locations?.map((location) => location.name)}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          className="w-full focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 text-[14px]"
           readOnly
         />
       </div>
@@ -246,7 +249,7 @@ function EditBookingForFleet({
               <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#05445E] text-white text-sm">
                 {participant?.name?.charAt(0).toUpperCase()}
               </span>
-              <span>{participant.name}</span>
+              <span className="text-[#0E0E0E]">{participant.name}</span>
             </li>
           ))}
         </ul>
@@ -256,7 +259,7 @@ function EditBookingForFleet({
         <input
           type="text"
           value={selectedBooking?.note}
-          className="w-full focus:outline-none text-gray-800 placeholder:text-gray-400 text-[14px]"
+          className="w-full focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 text-[14px]"
           readOnly
         />
       </div>
@@ -266,7 +269,7 @@ function EditBookingForFleet({
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="appearance-none bg-white border border-gray-500 text-gray-800 rounded-md p-2 focus:outline-none cursor-pointer text-[13px]"
+          className="appearance-none bg-white border border-[#454545] text-[#0E0E0E] rounded-md p-2 focus:outline-none cursor-pointer text-[13px]"
         />
       </div>
       <div className="mb-4 flex flex-row items-center space-x-2">
@@ -276,7 +279,7 @@ function EditBookingForFleet({
             name="start_time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
-            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-2 focus:outline-none text-[#0E0E0E] text-[14px]"
           >
             {timeArr.map((time, key) => (
               <option
@@ -292,16 +295,28 @@ function EditBookingForFleet({
             name="end_time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
-            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-500 bg-white outline-none rounded-md p-2 focus:outline-none text-gray-500 text-[14px]"
+            className="custom-dropdown w-[110px] overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-2 focus:outline-none text-[#0E0E0E] text-[14px]"
           >
-            {timeArr.map((time, key) => (
-              <option
-                value={`${time.time}:${time.minute} ${time.period}`}
-                key={key}
-              >
-                {time.time}:{time.minute} {time.period}
-              </option>
-            ))}
+            {timeArr
+              .filter((time) => {
+                const startIndex = timeArr.findIndex(
+                  (t) => `${t.time}:${t.minute} ${t.period}` === startTime
+                );
+                const currentIndex = timeArr.findIndex(
+                  (t) =>
+                    `${t.time}:${t.minute} ${t.period}` ===
+                    `${time.time}:${time.minute} ${time.period}`
+                );
+                return currentIndex > startIndex; // Only show times after start time
+              })
+              .map((time, key) => (
+                <option
+                  value={`${time.time}:${time.minute} ${time.period}`}
+                  key={key}
+                >
+                  {time.time}:{time.minute} {time.period}
+                </option>
+              ))}
           </select>
         </div>
       </div>
@@ -312,7 +327,7 @@ function EditBookingForFleet({
             Ferry
           </label>
           <select
-            className="border border-gray-300 rounded-lg focus:outline-none text-gray-800 placeholder:text-gray-400 px-4 py-[6px] pr-4 mt-2 text-[12px]"
+            className="border border-[#454545] rounded-lg focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 px-4 py-[6px] pr-4 mt-2 text-[12px]"
             value={selectedFacility}
             onChange={(e) => setSelectedFacility(e.target.value)}
           >
@@ -335,7 +350,7 @@ function EditBookingForFleet({
           />
           <label
             htmlFor="departure"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Departure
           </label>
@@ -343,7 +358,7 @@ function EditBookingForFleet({
         <div className="flex justify-start items-center gap-2">
           <label
             htmlFor="departure-duration"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Duration
           </label>
@@ -351,7 +366,7 @@ function EditBookingForFleet({
             name="departure-duration"
             value={departureDuration}
             onChange={(e) => setDepatureDuration(e.target.value)}
-            className="custom-dropdown overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-md p-1 focus:outline-none text-gray-500 text-[13px]"
+            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
@@ -380,7 +395,7 @@ function EditBookingForFleet({
         <div className="flex justify-start items-center gap-2">
           <label
             htmlFor="arrival-duration"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Duration
           </label>
@@ -388,7 +403,7 @@ function EditBookingForFleet({
             name="arrival-duration"
             value={arrivalDuration}
             onChange={(e) => setArrivalDuration(e.target.value)}
-            className="custom-dropdown overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-md p-1 focus:outline-none text-gray-500 text-[13px]"
+            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
@@ -421,7 +436,7 @@ function EditBookingForFleet({
           type="textarea"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="border border-gray-300 rounded-md w-full focus:outline-none p-2 text-gray-700 text-[13px]"
+          className="border border-[#454545] rounded-md w-full focus:outline-none p-2 text-gray-700 text-[13px]"
         >
           Remark
         </textarea>
@@ -441,7 +456,7 @@ function EditBookingForFleet({
               onClick={handleOutsideClick}
             >
               <div
-                className="bg-white p-4 rounded-lg shadow-md w-[350px] border-t-[10px] border-[#FF7878]"
+                className="bg-white p-4 rounded-lg shadow-md w-[350px] border-t-[10px] border-[#FF7878] z-50"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h2 className="text-[20px]">Delete Schedule</h2>

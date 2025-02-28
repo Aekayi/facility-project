@@ -10,7 +10,6 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import weblogo from "../../assets/weblogo.png";
 import calendar from "../../assets/calendar.png";
 import location from "../../assets/map-route.png";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import ListsInMap from "../../components/BookedListForManager/ListsInMap";
 import ProfileSetting from "../../components/BookedListForManager/ProfileSetting";
 import { useSelector } from "react-redux";
@@ -113,7 +112,7 @@ function ReservationMap() {
               <NavLink
                 to="/approver-records"
                 className={({ isActive }) =>
-                  `block rounded p-2 transition ${
+                  `block rounded-lg p-2 transition ${
                     isActive
                       ? "bg-white shadow-md"
                       : "hover:bg-white hover:shadow-md"
@@ -131,7 +130,7 @@ function ReservationMap() {
               <NavLink
                 to="/reservation-map"
                 className={({ isActive }) =>
-                  `block rounded p-2 transition ${
+                  `block rounded-lg p-2 transition ${
                     isActive
                       ? "bg-white shadow-md"
                       : "hover:bg-white hover:shadow-md"

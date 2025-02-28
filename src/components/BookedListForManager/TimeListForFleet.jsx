@@ -1,10 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import timeList from "../../assets/public/time.json";
 import BookedListForApprove from "./BookedListForApprove";
-import {
-  useFacilitynamesQuery,
-  useBookingDetailsQuery,
-} from "../../apps/features/apiSlice";
+import { useFacilitynamesQuery } from "../../apps/features/apiSlice";
 
 function TimeListForFleet({
   changeDate,
@@ -137,16 +134,19 @@ function TimeListForFleet({
                     );
                     console.log(fleetIndex, "fleetIndex");
 
-                    const columnWidth = 90 / facilityNames?.data?.length;
-                    const baseLeftPosition = `${
-                      fleetIndex * columnWidth + columnWidth / 3
-                    }`;
+                    const columnWidth = 93 / facilityNames?.data?.length;
+                    // const baseLeftPosition = `${
+                    //   fleetIndex * columnWidth + columnWidth / 3
+                    // }`;
                     return (
                       <div
                         key={index}
-                        className={`absolute rounded-md cursor-pointer`}
+                        className={`absolute rounded-md cursor-pointer booking-item`}
                         style={{
-                          left: `${baseLeftPosition}%`,
+                          // left: `${baseLeftPosition}%`,
+                          "--base-left": `${
+                            fleetIndex * columnWidth + columnWidth / 3
+                          }%`,
                           // zIndex: 30,
                           width: `${columnWidth - 10}%`,
                         }}

@@ -10,3 +10,20 @@
 .gm-style .gm-style-iw-c{
     padding: 0px !important;
 }
+
+.booking-item {
+    left: var(--base-left);
+  }
+  
+  @media (min-width: 1200px) {
+    .booking-item {
+      left: calc(var(--base-left));
+    }
+  }
+  
+  @media (min-width: 1600px) {
+    .booking-item {
+      left: calc(var(--base-left) - 30px);
+    }
+  }
+  

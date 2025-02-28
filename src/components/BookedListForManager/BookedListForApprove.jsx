@@ -52,6 +52,7 @@ function BookedListForApprove({
     const endTimeMinutes = normalizeTime(toTime);
 
     const startPosition = (startTimeMinutes / 60) * defaultHeight;
+    const endPosition = (endTimeMinutes / 60) * defaultHeight;
     const height = Math.max(
       ((endTimeMinutes - startTimeMinutes) / 60) * defaultHeight,
       0
@@ -86,11 +87,8 @@ function BookedListForApprove({
           parseInt(match[1], 10) * 60 + (parseInt(match[2], 10) || 0);
       }
     }
-    const startPositionForArrival = (endTimeMinutes / 60) * defaultHeight;
-    const arrivalTop =
-      startPositionForArrival -
-      (arrivalDuration / 60) * defaultHeight +
-      (arrivalDuration / 60) * defaultHeight;
+    const arrivalTop = endPosition;
+    const arrivalHeight = (arrivalDuration / 60) * defaultHeight;
 
     const overlappingBookings =
       bookings?.filter((booking) => {
@@ -123,12 +121,15 @@ function BookedListForApprove({
       height,
       departureTop,
       arrivalTop,
+      arrivalHeight,
       width: `${widthPercentage}%`,
       left: `${leftOffset}%`,
       position: "absolute",
-      zIndex: hovered ? 50 : 1,
-      boxShadow: hovered ? "0 4px 6px rgba(0, 0, 0, 0.5)" : "none",
-      transition: "z-index 0.1s linear",
+      zIndex: hovered ? 5 : 1,
+      boxShadow: hovered
+        ? "0 4px 6px rgba(0, 0, 0, 0.5)"
+        : "0 2px 4px rgba(0, 0, 0, 0.2)",
+      transition: " 0.1s linear",
     });
   }, [fromTime, toTime, bookings]);
   console.log(
@@ -144,11 +145,11 @@ function BookedListForApprove({
         {locations?.some((d) => d?.departure_transport === 1) &&
           status === "booked" && (
             <div
-              className="absolute  text-xs text-gray-700 bg-white bg-opacity-90 px-1 border border-b-0 border-dashed border-gray-400 rounded-[15px] rounded-b-none w-full"
+              className="absolute  text-xs text-gray-700 bg-white bg-opacity-90 px-1 border border-b-0 border-dashed border-gray-400 rounded-[15px] rounded-b-none w-full shadow-md"
               style={{
                 top: style.departureTop + 24,
                 height: style.top - style.departureTop,
-                borderLeft: "2px dashed gray", // Vertical line
+                borderLeft: "2px dashed gray",
                 borderRight: "2px dashed gray",
                 borderTop: "2px dashed gray",
                 width: style.width,
@@ -160,16 +161,25 @@ function BookedListForApprove({
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
             >
-              {`Departure: ${locations
-                ?.map((d) => d?.departure_time_format)
-                .filter(Boolean)
-                .join(", ")}`}
+              <p
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "5px",
+                  transform: "translateY(-50%)",
+                }}
+              >
+                {`Departure: ${locations
+                  ?.map((d) => d?.departure_time_format)
+                  .filter(Boolean)
+                  .join(", ")}`}
+              </p>
             </div>
           )}
       </div>
       <div
         className={`px-2
-         rounded-md shadow-md cursor-pointer ${
+         rounded-md cursor-pointer ${
            status === "booked" ? " bg-[#B6D26F]" : "bg-[#E3EEC7]"
          } }`}
         style={{ ...style, position: "absolute" }}
@@ -190,23 +200,25 @@ function BookedListForApprove({
               className="absolute text-xs text-gray-700 bg-white bg-opacity-90  py-1 border border-dashed border-t-0 border-gray-400 rounded-[15px] rounded-t-none w-full "
               style={{
                 top: style.arrivalTop + 24,
-                height: style.top - style.departureTop - 24,
+                height: style.arrivalHeight,
                 borderLeft: "2px dashed gray",
                 borderRight: "2px dashed gray",
                 borderBottom: "2px dashed gray",
                 width: style.width,
-                left: style.left,
+                // left: style.left,
                 zIndex: style.zIndex,
                 boxShadow: style.boxShadow,
                 transition: style.transition,
               }}
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
             >
               <p
                 style={{
                   position: "absolute",
-                  bottom: 0,
-                  left: "50%",
-                  transform: "translateX(-50%)",
+                  bottom: "40%",
+                  transform: "translateY(-50%)",
+                  left: "5px",
                 }}
               >
                 {`Arrival: ${locations
