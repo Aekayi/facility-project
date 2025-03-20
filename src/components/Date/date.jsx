@@ -39,7 +39,7 @@ const DateList = ({
     const relativeY = e.clientY - top + scrollTop;
     const relativeX = e.clientX - left + scrollLeft;
 
-    const slotHeight = 12.5;
+    const slotHeight = 13;
     const totalminutes = Math.floor(relativeY / slotHeight) * 15;
 
     const hours = Math.floor(totalminutes / 60);
@@ -139,7 +139,7 @@ const DateList = ({
   return (
     <>
       <div
-        className="date-layout relative w-full border-gray-800 h-[1200px] pt-1 overflow-hidden"
+        className="date-layout relative w-full border-gray-800 h-[1350px] pt-1 overflow-hidden"
         onMouseMove={handleMouseMove}
       >
         <ul className={`absolute w-full h-full`}>
@@ -179,7 +179,7 @@ const DateList = ({
               returnData.push(
                 <li
                   key={`${index}-${i}`}
-                  className={`min-h-[10px] flex items-start justify-between relative ${
+                  className={`h-[14px] flex items-start justify-between relative ${
                     isPastTime || holiday || !selectedDay
                       ? " bg-red-80 opacity-50 cursor-not-allowed"
                       : "cursor-pointer"
@@ -188,7 +188,12 @@ const DateList = ({
                     .toString()
                     .padStart(2, "0")} ${amPm}`}
                   onClick={() => {
-                    if (!isPastTime) {
+                    if (
+                      !isPastTime &&
+                      !holiday &&
+                      selectedDay &&
+                      facilityByRoomId !== "8"
+                    ) {
                       openCreateModal();
                       setSelectedTime({
                         hour: slotTime === 12 ? 12 : slotTime % 12,
@@ -221,7 +226,7 @@ const DateList = ({
             return returnData;
           })}
         </ul>
-        <div className="line absolute w-[1px] left-[80px] h-[1200px] bg-slate-300"></div>
+        <div className="line absolute w-[1px] left-[80px] h-[1350px] bg-slate-300"></div>
 
         {booked?.map((item, index) => {
           if (
@@ -291,6 +296,7 @@ const DateList = ({
           </div>
         </div>
       )}
+      {console.log(selectedBooking, "selectedBooking")}
       {isModalOpen && (
         <div>
           {selectedBooking && (

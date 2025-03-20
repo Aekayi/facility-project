@@ -26,6 +26,7 @@ import People from "./people.svg";
 import Profile from "./profile.svg";
 import ManagerProfile from "./profile.png";
 import Time from "./time.svg";
+import Group from "./group.png";
 export default {
   Logo,
   Meeting_room,
@@ -55,4 +56,5 @@ export default {
   Profile,
   ManagerProfile,
   Time,
+  Group,
 };

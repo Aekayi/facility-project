@@ -1,167 +1,177 @@
 {"duration": [
     {
       "id": 1,
-      "time": "1",
-      "minute": "00"
+      "time": "00",
+      "minute": "15"
     },
     {
       "id": 2,
-      "time": "1",
-      "minute": "15"
+      "time": "00",
+      "minute": "30"
     },
     {
       "id": 3,
-      "time": "1",
-      "minute": "30"
+      "time": "01",
+      "minute": "00"
     },
     {
       "id": 4,
-      "time": "1",
-      "minute": "45"
+      "time": "01",
+      "minute": "15"
     },
     {
       "id": 5,
-      "time": "2",
-      "minute": "00"
+      "time": "01",
+      "minute": "30"
     },
     {
       "id": 6,
-      "time": "2",
-      "minute": "15"
+      "time": "01",
+      "minute": "45"
     },
     {
       "id": 7,
-      "time": "2",
-      "minute": "30"
+      "time": "02",
+      "minute": "00"
     },
     {
       "id": 8,
-      "time": "2",
-      "minute": "45"
+      "time": "02",
+      "minute": "15"
     },
     {
       "id": 9,
-      "time": "3",
-      "minute": "00"
+      "time": "02",
+      "minute": "30"
     },
     {
       "id": 10,
-      "time": "3",
-      "minute": "15"
+      "time": "02",
+      "minute": "45"
     },
     {
       "id": 11,
-      "time": "3",
-      "minute": "30"
+      "time": "03",
+      "minute": "00"
     },
     {
       "id": 12,
-      "time": "3",
-      "minute": "45"
+      "time": "03",
+      "minute": "15"
     },
     {
       "id": 13,
-      "time": "4",
-      "minute": "00"
+      "time": "03",
+      "minute": "30"
     },
     {
       "id": 14,
-      "time": "4",
-      "minute": "15"
+      "time": "03",
+      "minute": "45"
     },
     {
       "id": 15,
-      "time": "4",
-      "minute": "30"
+      "time": "04",
+      "minute": "00"
     },
     {
       "id": 16,
-      "time": "4",
-      "minute": "45"
+      "time": "04",
+      "minute": "15"
     },
     {
       "id": 17,
-      "time": "5",
-      "minute": "00"
+      "time": "04",
+      "minute": "30"
     },
     {
       "id": 18,
-      "time": "5",
-      "minute": "15"
+      "time": "04",
+      "minute": "45"
     },
     {
       "id": 19,
-      "time": "5",
-      "minute": "30"
+      "time": "05",
+      "minute": "00"
     },
     {
       "id": 20,
-      "time": "5",
-      "minute": "45"
+      "time": "05",
+      "minute": "15"
     },
     {
       "id": 21,
-      "time": "6",
-      "minute": "00"
+      "time": "05",
+      "minute": "30"
     },
     {
       "id": 22,
-      "time": "6",
-      "minute": "15"
+      "time": "05",
+      "minute": "45"
     },
     {
       "id": 23,
-      "time": "6",
-      "minute": "30"
+      "time": "06",
+      "minute": "00"
     },
     {
       "id": 24,
-      "time": "6",
-      "minute": "45"
+      "time": "06",
+      "minute": "15"
     },
     {
       "id": 25,
-      "time": "7",
-      "minute": "00"
+      "time": "06",
+      "minute": "30"
     },
     {
       "id": 26,
-      "time": "7",
-      "minute": "15"
+      "time": "06",
+      "minute": "45"
     },
     {
       "id": 27,
-      "time": "7",
-      "minute": "30"
-    },
-    {
-      "id": 28,
-      "time": "7",
-      "minute": "45"
-    },
-    {
-      "id": 29,
-      "time": "8",
+      "time": "07",
       "minute": "00"
     },
     {
-      "id": 30,
-      "time": "8",
+      "id": 28,
+      "time": "07",
       "minute": "15"
     },
     {
-      "id": 31,
-      "time": "8",
+      "id": 29,
+      "time": "07",
       "minute": "30"
     },
     {
-      "id": 32,
-      "time": "8",
+      "id": 30,
+      "time": "07",
       "minute": "45"
     },
     {
+      "id": 31,
+      "time": "08",
+      "minute": "00"
+    },
+    {
+      "id": 32,
+      "time": "08",
+      "minute": "15"
+    },
+    {
       "id": 33,
-      "time": "9",
+      "time": "08",
+      "minute": "30"
+    },
+    {
+      "id": 34,
+      "time": "08",
+      "minute": "45"
+    },
+    {
+      "id": 35,
+      "time": "09",
       "minute": "00"
     }  
   ]}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useChangePasswordMutation } from "../../apps/features/apiSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -9,12 +9,17 @@ import { clearCredentials } from "../../apps/features/AuthSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 const ChangePasswordPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [changePassword, { isLoading, isSuccess, isError, error }] =
     useChangePasswordMutation();
+
+  const [oldPassword, setOldPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -46,8 +51,7 @@ const ChangePasswordPage = () => {
           notifyerror();
           return;
         } else {
-          notifysuccess();
-          alert(response.message);
+          toast.success("Password changed successfully!");
         }
 
         console.log("API Response:", response);
@@ -72,7 +76,7 @@ const ChangePasswordPage = () => {
 
   return (
     <>
-      <div className="h-full w-2/3 max-w-md bg-white">
+      <div className="min-h-screen w-2/3 max-w-md bg-white">
         <div className="m-4">
           <div className="container flex justify-between items-center py-3 px-4 mb-4 border border-gray-300 shadow rounded">
             <button className="back-con" onClick={handleBack}>
@@ -83,22 +87,29 @@ const ChangePasswordPage = () => {
                 alt="Back"
               />
             </button>
-            <h1 className="text-xl font-semibold text-blue-500">
+            <h1 className="text-xl font-semibold text-[#05445E]">
               Change Password
             </h1>
             <SettingBox />
           </div>
           <form onSubmit={formik.handleSubmit}>
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <input
-                type="password"
+                type={oldPassword ? "text" : "password"}
                 name="current_password"
                 value={formik.values.current_password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-[#d4f1f4]"
                 placeholder="Enter old password"
               />
+              <button
+                type="button"
+                onClick={() => setOldPassword(!oldPassword)}
+                className="absolute top-2 right-3 flex items-center text-gray-600"
+              >
+                {oldPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+              </button>
               {formik.touched.current_password &&
                 formik.errors.current_password && (
                   <div className="text-red-500">
@@ -107,16 +118,23 @@ const ChangePasswordPage = () => {
                 )}
             </div>
 
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <input
-                type="password"
+                type={newPassword ? "text" : "password"}
                 name="password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-[#d4f1f4]"
                 placeholder="Enter new password"
               />
+              <button
+                type="button"
+                onClick={() => setNewPassword(!newPassword)}
+                className="absolute top-2 right-3 flex items-center text-gray-600"
+              >
+                {newPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+              </button>
               {formik.touched.password && formik.errors.password && (
                 <div className="text-red-500">{formik.errors.password}</div>
               )}
@@ -154,7 +172,7 @@ const ChangePasswordPage = () => {
             <button
               type="submit"
               disabled={isLoading || formik.isSubmitting}
-              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded w-full"
+              className="bg-[#05445E] hover:bg-[#05445E]/80 text-white py-2 px-4 rounded w-full"
             >
               {isLoading ? "Changing..." : "Change Password"}
             </button>

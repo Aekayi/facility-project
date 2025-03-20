@@ -53,11 +53,11 @@ const ProfileSetting = () => {
         />
         {isOpen && (
           <div
-            className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10"
+            className="absolute right-0 mt-2 w-[120px] bg-white rounded-md shadow-lg z-10"
             ref={menuRef}
           >
             <div
-              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              className="px-2 py-2 text-gray-700 text-left hover:bg-gray-100 cursor-pointer"
               onClick={() => {
                 setIsOpen(false);
                 navigate(`/`);
@@ -66,7 +66,7 @@ const ProfileSetting = () => {
               Home
             </div>
             <div
-              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              className="px-2 py-2 text-gray-700 text-left hover:bg-gray-100 cursor-pointer"
               onClick={() => {
                 setIsOpen(false);
                 handleLogout();

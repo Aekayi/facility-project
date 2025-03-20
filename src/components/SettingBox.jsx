@@ -59,11 +59,11 @@ const SettingBox = () => {
         </svg>
         {isOpen && (
           <div
-            className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10"
+            className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-custom z-10 p-2"
             ref={menuRef}
           >
             <div
-              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer text-left"
               onClick={() => {
                 setIsOpen(false);
                 navigate("/records");
@@ -72,7 +72,7 @@ const SettingBox = () => {
               My Bookings
             </div>
             <div
-              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer text-left"
               onClick={() => {
                 setIsOpen(false);
                 navigate("/change-password");
@@ -82,17 +82,17 @@ const SettingBox = () => {
             </div>
             {isApprover && (
               <div
-                className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer text-left"
                 onClick={() => {
                   setIsOpen(false);
                   navigate("/approver-records");
                 }}
               >
-                Bookings for Approve
+                Manage Fleet Booking
               </div>
             )}
             <div
-              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              className="px-2 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer text-left"
               onClick={() => {
                 setIsOpen(false);
                 handleLogout();

@@ -21,6 +21,8 @@ import NewLocation from "./NewLocation";
 import CreateGoogleMap from "./CreateGoogleMap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ClearIcon from "@mui/icons-material/Clear";
+import dayjs from "dayjs";
 
 const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
   console.log(selectedTime, "selectedTime");
@@ -79,6 +81,7 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
   const [title, setTitle] = useState();
   const [addPerson, setAddPerson] = useState([]);
   const [addGuest, setAddGuest] = useState([]);
+  const [inputValue, setInputValue] = useState("");
 
   const [timeError, setTimeError] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -101,63 +104,50 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
     return hours24 * 60 + minutes;
   };
 
-  const timeAlreadyBooked = (startTime, endTime, existingBookings) => {
-    const startMinutes = parseTime(startTime);
-    const endMinutes = parseTime(endTime);
+  // const timeAlreadyBooked = (startTime, endTime, existingBookings) => {
+  //   const startMinutes = parseTime(startTime);
+  //   const endMinutes = parseTime(endTime);
 
-    for (let booking of existingBookings) {
-      const existingStartMinutes = parseTime(booking.start_time);
-      const existingEndMinutes = parseTime(booking.end_time);
+  //   for (let booking of existingBookings) {
+  //     const existingStartMinutes = parseTime(booking.start_time);
+  //     const existingEndMinutes = parseTime(booking.end_time);
 
-      if (
-        (startMinutes >= existingStartMinutes &&
-          startMinutes < existingEndMinutes) ||
-        (endMinutes > existingStartMinutes &&
-          endMinutes <= existingEndMinutes) ||
-        (startMinutes <= existingStartMinutes &&
-          endMinutes >= existingEndMinutes) ||
-        (startMinutes < existingStartMinutes &&
-          endMinutes > existingStartMinutes - 15) || // Less than 15 mins before a booking
-        (startMinutes > existingEndMinutes &&
-          startMinutes < existingEndMinutes + 15)
-      ) {
-        return true;
-      }
-    }
+  //     if (
+  //       (startMinutes >= existingStartMinutes &&
+  //         startMinutes < existingEndMinutes) ||
+  //       (endMinutes > existingStartMinutes &&
+  //         endMinutes <= existingEndMinutes) ||
+  //       (startMinutes <= existingStartMinutes &&
+  //         endMinutes >= existingEndMinutes) ||
+  //       (startMinutes < existingStartMinutes &&
+  //         endMinutes > existingStartMinutes - 15) || // Less than 15 mins before a booking
+  //       (startMinutes > existingEndMinutes &&
+  //         startMinutes < existingEndMinutes + 15)
+  //     ) {
+  //       return true;
+  //     }
+  //   }
 
-    return false;
-  };
+  //   return false;
+  // };
+
+  const currentTime = new Date();
+  const currentHours = currentTime.getHours();
+  const currentMinutes = currentTime.getMinutes();
+  const isPM = currentHours >= 12;
+
+  const isToday = dayjs(changeDate).isSame(dayjs(), "day");
+  console.log(isToday, "isTodayyyy");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const maxLength = 200;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (name === "start_time" || name === "end_time") {
-      const startMinutes = parseTime(
-        name === "start_time" ? value : formData.start_time
-      );
-      const endMinutes = parseTime(
-        name === "end_time" ? value : formData.end_time
-      );
-
-      if (startMinutes >= endMinutes) {
-        setTimeError("Start time must be less than end time.");
-      } else if (
-        !coordList &&
-        timeAlreadyBooked(
-          name === "start_time" ? value : formData.start_time,
-          name === "end_time" ? value : formData.end_time,
-          bookedListByDate?.data || []
-        )
-      ) {
-        setTimeError("This time is already booked or does not gap 15 minutes!");
-      } else {
-        setTimeError("");
-      }
+    if (value.length <= maxLength) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
   useEffect(() => {
@@ -167,10 +157,40 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
     }));
   }, [changeDate]);
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && inputValue.trim() !== "") {
+      e.preventDefault();
+      setAddGuest([...addGuest, inputValue.trim()]);
+      setInputValue(""); // Clear input
+    }
+  };
+
+  const removeGuest = (index) => {
+    setAddGuest(addGuest.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (timeError) {
+      return;
+    }
+
+    const hasConflict = bookedListByDate?.data?.some((booking) => {
+      const existingEndMinutes = parseTime(booking.end_time);
+      const newStartMinutes = parseTime(formData.start_time);
+
+      return (
+        newStartMinutes < existingEndMinutes + 15 &&
+        newStartMinutes >= existingEndMinutes
+      );
+    });
+
+    if (hasConflict) {
+      toast.error("Please leave a 15-minutes gap for the next booking.", {
+        style: { backgroundColor: "#d4f1f4" },
+        progressStyle: { background: "red" },
+      });
       return;
     }
 
@@ -190,10 +210,9 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
       guests: addGuest,
     };
 
-    // console.log(bookingDetails, "bookingDetails");
-
     try {
       const response = await createBooking(bookingDetails).unwrap();
+      console.log(response, "response");
 
       if (response.status === false) {
         setSuccess(false);
@@ -251,12 +270,6 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
     [onClose]
   );
 
-  // useEffect(() => {
-  //   if (location.length > 0) {
-  //     console.log("Location updated:", location);
-  //   }
-  // }, [location]);
-
   useEffect(() => {
     if (isModalOpen || newLocationModal) {
       document.body.style.overflow = "hidden"; // Disable scrolling
@@ -302,23 +315,50 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
                 name="start_time"
                 value={formData.start_time}
                 onChange={handleInputChange}
-                className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-sm p-1 focus:outline-[#757575] text-gray-500"
+                className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-sm p-1 focus:outline-none text-gray-500"
               >
-                {timeArr?.map((time, index) => (
+                {/* {timeArr?.map((time, index) => (
                   <option
                     value={`${time.time}:${time.minute} ${time.period}`}
                     key={index}
                   >
                     {time.time}:{time.minute} {time.period}
                   </option>
-                ))}
+                ))} */}
+                {timeArr
+                  ?.filter((time) => {
+                    if (!isToday) return true;
+                    const hours = parseInt(time.time, 10);
+                    const minutes = parseInt(time.minute, 10);
+                    const isTimePM = time.period === "pm";
+
+                    // Convert 12-hour format to 24-hour format
+                    let formattedHours = isTimePM
+                      ? (hours % 12) + 12
+                      : hours % 12;
+                    if (hours === 12) formattedHours = isTimePM ? 12 : 0;
+
+                    return (
+                      formattedHours > currentHours ||
+                      (formattedHours === currentHours &&
+                        minutes >= currentMinutes)
+                    );
+                  })
+                  .map((time, index) => (
+                    <option
+                      value={`${time.time}:${time.minute} ${time.period}`}
+                      key={index}
+                    >
+                      {time.time}:{time.minute} {time.period}
+                    </option>
+                  ))}
               </select>
               <label>-</label>
               <select
                 name="end_time"
                 value={formData.end_time}
                 onChange={handleInputChange}
-                className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-sm p-1 focus:outline-[#757575] text-gray-500"
+                className="custom-dropdown w-[110px] overflow-auto border-[1px] border-gray-300 bg-white outline-none rounded-sm p-1 focus:outline-none text-gray-500"
               >
                 {timeArr
                   .filter((time) => {
@@ -367,18 +407,31 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
             <div className="timeIcon w-[40px] flex justify-start align-middle text-[#05445E]">
               <AiOutlineUsergroupAdd size={21} />
             </div>
-            <input
-              type="text"
-              name="guests"
-              value={addGuest.join(", ")} // Display as a comma-separated string
-              onChange={(e) =>
-                setAddGuest(
-                  e.target.value.split(",").map((email) => email.trim())
-                )
-              }
-              className="w-full border-b-[1px] border-gray-300 focus:outline-none placeholder:text-gray-500"
-              placeholder="Add guest emails (optional)"
-            />
+            <div className="w-full flex flex-wrap items-center border-b-[1px] border-gray-300">
+              {addGuest?.map((email, index) => (
+                <div
+                  key={index}
+                  className="flex items-center border border-[#05445E] text-[#05445E] px-2 py-1 rounded-lg mr-2 mb-1 text-sm"
+                >
+                  {email}
+                  <button
+                    onClick={() => removeGuest(index)}
+                    className="ml-2 text-gray-500 hover:text-[#05445E]"
+                  >
+                    <ClearIcon fontSize="small" />
+                  </button>
+                </div>
+              ))}
+              <input
+                type="text"
+                name="guests"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="flex-grow p-1 focus:outline-none placeholder:text-gray-500"
+                placeholder="Add guest emails (press Enter)"
+              />
+            </div>
           </div>
 
           {/* Location Field */}
@@ -455,7 +508,7 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
                           }}
                           type="button"
                         >
-                          Save
+                          Add
                         </button>
                       </div>
                     </div>
@@ -497,12 +550,13 @@ const Create = ({ facilityByRoomId, onClose, selectedTime, changeDate }) => {
 
               {location.length > 0 && (
                 <div>
+                  {console.log(location, "location........")}
                   {location.map((loc, index) => (
                     <div
                       key={index}
                       className="ml-10 flex justify-between items-start border border-[#05445E] text-[#05445E] text-sm p-2 mb-2 bg-transparent rounded-md"
                     >
-                      <p>{loc?.name || loc?.address}</p>
+                      <p>{loc?.name}</p>
                       <button
                         className="ml-2"
                         onClick={() => {

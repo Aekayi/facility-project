@@ -123,7 +123,7 @@ const BookingDate = () => {
           {roomDetails && (
             <>
               {/* Header Section */}
-              <div className="sticky top-0 z-50 bg-white">
+              <div className="sticky top-0 z-10 bg-white">
                 <div className="relative">
                   <div className="absolute flex justify-between items-center bg-black bg-opacity-50 w-full p-2">
                     <button className="back-con" onClick={handleBack}>
@@ -147,7 +147,6 @@ const BookingDate = () => {
                 <div>
                   <div className="flex flex-row justify-between items-center w-full h-auto mt-4 mb-4 z-50">
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      {/* <div className="flex w-full justify-between"> */}
                       <DemoContainer
                         components={["DatePicker"]}
                         className="h-[20px]"
@@ -194,7 +193,6 @@ const BookingDate = () => {
                           className="bg-red-500"
                         />
                       </DemoContainer>
-                      {/* </div> */}
                     </LocalizationProvider>
 
                     <button
@@ -202,14 +200,12 @@ const BookingDate = () => {
                         const now = new Date();
                         let hours = now.getHours();
 
-                        console.log(hours, "hours");
                         let minutes = now.getMinutes();
                         minutes = Math.ceil(minutes / 15) * 15;
                         if (minutes === 60) {
                           minutes = 0;
                           hours += 1;
                         }
-                        console.log(minutes, "minutes");
 
                         // // Convert to 12-hour format
                         const ampm = hours >= 12 ? "pm" : "am";
@@ -219,14 +215,15 @@ const BookingDate = () => {
                           minute: minutes,
                           period: ampm,
                         });
-                        console.log(selectedTime, "selectedTime");
                         setIsModalOpen(true);
                       }}
                       className={`bg-[#05445E] px-1 md:px-2 py-1 lg:py-2 text-white text-sm rounded-md hover:bg-[#05445E]/80 mt-[6px] ${
-                        !selectedDay || holiday ? "cursor-not-allowed" : ""
+                        !selectedDay || holiday || facilityByRoomId === "8"
+                          ? "cursor-not-allowed"
+                          : ""
                       }`}
                     >
-                      Book New
+                      Book Now
                     </button>
                   </div>
 
@@ -257,37 +254,40 @@ const BookingDate = () => {
               </div>
 
               {/* Modal Box */}
-              {isModalOpen && selectedDay && !holiday && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-                  <div className="bg-white w-full max-w-md  rounded-lg shadow-lg relative">
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        class="size-6"
+              {isModalOpen &&
+                selectedDay &&
+                !holiday &&
+                facilityByRoomId !== "8" && (
+                  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white w-full max-w-md  rounded-lg shadow-lg relative">
+                      <button
+                        onClick={() => setIsModalOpen(false)}
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
                       >
-                        <path
-                          fill-rule="evenodd"
-                          d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                    <Create
-                      addBooking={addBooking}
-                      facilityByRoomId={facilityByRoomId}
-                      id={id}
-                      onClose={() => setIsModalOpen(false)}
-                      selectedTime={selectedTime}
-                      changeDate={formatDate(selectedDate)}
-                    />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          class="size-6"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                      <Create
+                        addBooking={addBooking}
+                        facilityByRoomId={facilityByRoomId}
+                        id={id}
+                        onClose={() => setIsModalOpen(false)}
+                        selectedTime={selectedTime}
+                        changeDate={formatDate(selectedDate)}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               <div
                 className={

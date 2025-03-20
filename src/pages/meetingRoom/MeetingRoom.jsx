@@ -37,7 +37,7 @@ const MeetingRoom = () => {
         </div>
       ) : (
         <div className="m-4">
-          <div className="container flex justify-between items-center py-3 px-4 mb-4 border border-gray-300 shadow rounded">
+          <div className="container flex justify-between items-center py-2 px-4 mb-4 border border-gray-300 shadow rounded">
             <button className="back-con" onClick={handleBack}>
               <img
                 src={LocalIcon.BackColor}
@@ -69,17 +69,31 @@ const MeetingRoom = () => {
                     <h3 className="text-lg font-normal text-[#05445E] ">
                       {facility.name}
                     </h3>
-                    {Object.keys(facility?.currentBooking).length === 0 ? (
-                      <p className="available text-green-600">Available Now</p>
-                    ) : (
+                    {console.log(facility?.name, "facility?.name")}
+                    {[
+                      "SOLO Meeting Room",
+                      "IG Meeting Room",
+                      "Main Meeting Room",
+                      "HR Meeting Room",
+                      "Digital Meeting Room",
+                    ].includes(facility?.name) &&
+                      facility?.currentBooking &&
+                      Object.keys(facility?.currentBooking).length === 0 && (
+                        <p className="available text-green-600">
+                          Available Now
+                        </p>
+                      )}
+
+                    {Object.keys(facility?.currentBooking).length > 0 && (
                       <p className="occupied text-red-600 text-start">
                         Occupied ({facility?.currentBooking.startTime} to{" "}
                         {facility?.currentBooking.endTime}){" "}
                       </p>
                     )}
+
                     {facility?.upcoming && (
                       <p className="text-blue-900">
-                        upcoming booking at {facility?.upcoming}
+                        Upcoming booking at {facility?.upcoming}
                       </p>
                     )}
                   </div>

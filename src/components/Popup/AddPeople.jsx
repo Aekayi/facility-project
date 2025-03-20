@@ -21,23 +21,14 @@ function AddPeople({
   setFilteredPeople,
 }) {
   const [inputValue, setInputValue] = useState("");
-  const [guestInput, setGuestInput] = useState("");
-  const [searchPeople, setSearchPeople] = useState([]);
-  // const [filteredPeople, setFilteredPeople] = useState([]);
-  // const [addPerson, setAddPerson] = useState([]);
+
   const [showFilteredPeople, setShowFilteredPeople] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const inputRef = useRef(null);
 
-  // const { data: peopleLists } = useUsersQuery();
-  // console.log(peopleLists, "people.......");
-
   const { data: participantsData } = useParticipantsQuery();
 
   const loginUser = useSelector((state) => state.auth.id);
-  // const usersPeoples = peopleLists?.data
-  //   ?.filter((person) => person.id !== loginUser)
-  //   ?.sort((a, b) => a.name.localeCompare(b.name));
 
   const participantLists = participantsData
     ?.filter((participant) => participant.id !== loginUser)
@@ -97,7 +88,7 @@ function AddPeople({
 
   const handleItemRemove = (person) => {
     const updatedItems = showFilteredPeople?.filter(
-      (people) => people.id !== person.id
+      (people) => people.email !== person.email
     );
 
     setShowFilteredPeople(updatedItems);
@@ -111,14 +102,14 @@ function AddPeople({
     setFilteredPeople(result);
   };
 
-  const handleSelectAll = (e) => {
-    setSelectAll((prevSelectAll) => !prevSelectAll);
-    if (!selectAll) {
-      setAddPerson(allUser);
-    } else {
-      setAddPerson([]);
-    }
-  };
+  // const handleSelectAll = (e) => {
+  //   setSelectAll((prevSelectAll) => !prevSelectAll);
+  //   if (!selectAll) {
+  //     setAddPerson(allUser);
+  //   } else {
+  //     setAddPerson([]);
+  //   }
+  // };
 
   useEffect(() => {
     if (participants) {
@@ -131,19 +122,40 @@ function AddPeople({
     setFilteredPeople(allUser);
   }, [participantsData]);
 
+  // const handleSelectDropDownPerson = (person) => {
+  //   const personAdded = addPerson.some((p) => p.email === person.email);
+  //   if (!personAdded) {
+  //     setAddPerson((prevList) => {
+  //       if (!prevList.some((p) => p.email === person.email)) {
+  //         return [...prevList, person];
+  //       } else {
+  //         return prevList;
+  //       }
+  //     });
+  //     setShowFilteredPeople((prevList) =>
+  //       prevList.filter((p) => p.email !== person.email)
+  //     );
+  //   } else {
+  //     setAddPerson((prevList) =>
+  //       prevList.filter((p) => p.email !== person.email)
+  //     );
+  //   }
+
   const handleSelectDropDownPerson = (person) => {
-    const personAdded = addPerson.some((p) => p.id === person.id);
-    if (!personAdded) {
-      setAddPerson((prevList) => {
-        if (!prevList.some((p) => p.id === person.id)) {
-          return [...prevList, person];
-        } else {
-          return prevList;
-        }
-      });
-    } else {
-      setAddPerson((prevList) => prevList.filter((p) => p.id !== person.id));
-    }
+    setAddPerson((prevList) => {
+      const personAdded = prevList.some((p) => p.email === person.email);
+      let updatedList;
+
+      if (!personAdded) {
+        updatedList = [...prevList, person];
+      } else {
+        updatedList = prevList.filter((p) => p.email !== person.email);
+      }
+
+      // Update filtered people with the latest addPerson state
+      setShowFilteredPeople(updatedList);
+      return updatedList;
+    });
 
     if (selectAll) {
       setSelectAll(false);
@@ -167,7 +179,7 @@ function AddPeople({
             setIsDropdownOpen((prev) => !prev);
             dropDownList();
           }}
-          className="bg-transparent outline-none focus:outline-none placeholder:text-gray-500 border-b border-gray-300 w-full"
+          className="bg-transparent outline-none focus:outline-none placeholder:text-gray-500 border-b border-gray-500 w-full"
         />
       </section>
 
@@ -178,7 +190,7 @@ function AddPeople({
         ref={inputRef}
       >
         {isDropdownOpen && (
-          <div className="py-[10px] px-[15px] border-[0.4px] border-[#05445E] rounded-lg bg-[#d4f1f4] shadow-md">
+          <div className="py-[10px] px-[15px] border border-[#bebfc5] rounded-lg bg-[#f5f5f5] shadow-xl">
             <div
               className="close-btn flex justify-end "
               onClick={() => setIsDropdownOpen(false)}
@@ -200,14 +212,8 @@ function AddPeople({
                 className="bg-transparent outline-none focus:outline-none placeholder:text-gray-500  mb-2 ml-2 text-sm w-full"
               />
             </div>
-            <div
-              className="user-list-box min-h-[350px] max-h-[350px] overflow-auto  w-full py-[5px] px-[15px] mt-[5px]"
-              // style={{
-              //   maxHeight:
-              //     facilityFilter[0]?.needLocation == 0 ? "130px" : "190px",
-              // }}
-            >
-              {inputValue == "" ? (
+            <div className="user-list-box min-h-[350px] max-h-[350px] overflow-auto  w-full py-[5px] px-[15px] mt-[5px]">
+              {/* {inputValue == "" ? (
                 <div
                   className="h-[50px] flex justify-between items-center border-b-[1px] border-[#05445e66] cursor-pointer"
                   onClick={(e) => handleSelectAll(e)}
@@ -229,7 +235,7 @@ function AddPeople({
                     onChange={handleSelectAll}
                   />
                 </div>
-              ) : null}
+              ) : null} */}
               {filteredPeople?.map((person, index) => (
                 <div
                   className=" flex justify-between items-center h-[50px] ml-[4px] cursor-pointer border-b-[1px] border-[#05445e66] "
@@ -247,7 +253,7 @@ function AddPeople({
                   <input
                     className="w-4 h-4 border-none rounded-md outline-none focus:bg-[#05445E] "
                     type="checkbox"
-                    checked={addPerson.some((p) => p.id === person.id)}
+                    checked={addPerson.some((p) => p.email === person.email)}
                     onChange={() => handleSelectDropDownPerson(person)}
                   />
                 </div>
@@ -257,10 +263,6 @@ function AddPeople({
           </div>
         )}
       </div>
-
-      {/* )} */}
-
-      {/* show lists */}
 
       {
         // !isDropdownOpen &&

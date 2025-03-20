@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import {
   useUserbyIdQuery,
@@ -21,14 +21,17 @@ const Booked = ({
   status,
   timeId,
   setCreateData,
-  defaultHeight = 50,
+  defaultHeight = 56,
 }) => {
-  console.log(locations, "locations");
+  const itemRef = useRef(null);
+  const [overflowing, setIsOverflowing] = useState(false);
   const [style, setStyle] = useState({ top: 0, height: 0 });
   const [hovered, setHovered] = useState(false);
   const [pastBooking, setPastBooking] = useState(false);
   const [isUser, setIsUser] = useState(false);
   const [isAdminApproved, setIsAdminApproved] = useState(false);
+  const [departureTime, setDepartureTime] = useState("");
+  const [arrivalTime, setArrivalTime] = useState("");
 
   const user = localStorage.getItem("persist:auth");
   const userData = JSON.parse(user);
@@ -42,7 +45,6 @@ const Booked = ({
     facilityByRoomId: facility_id?.id,
     bookedListByDate: book_date,
   });
-  // console.log(bookedList, "bookedList");
 
   const normalizeTime = (time) => {
     const regex = /^(\d{1,2}):(\d{2})\s*([apAP][mM])$/;
@@ -65,6 +67,29 @@ const Booked = ({
     return hour * 60 + minute;
   };
 
+  const getFormattedTime = (totalMinutes) => {
+    let hours = Math.floor(totalMinutes / 60);
+    let minutes = totalMinutes % 60;
+    let period = hours >= 12 ? "PM" : "AM";
+
+    if (hours > 12) hours -= 12;
+    if (hours === 0) hours = 12;
+
+    return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
+  };
+
+  const calculateAdjustedTime = (
+    baseTime,
+    adjustmentMinutes,
+    isAdding = false
+  ) => {
+    let baseMinutes = normalizeTime(baseTime);
+    let adjustedMinutes = isAdding
+      ? baseMinutes + adjustmentMinutes
+      : baseMinutes - adjustmentMinutes;
+    return getFormattedTime(adjustedMinutes);
+  };
+
   const overlappingBookings =
     bookedList?.data?.filter((booking) => {
       const startA = normalizeTime(booking.start_time);
@@ -73,11 +98,7 @@ const Booked = ({
       const endB = normalizeTime(toTime);
 
       return (
-        booking.book_date === book_date &&
-        !(
-          endA <= startB || // booking ends before this booking starts
-          startA >= endB
-        )
+        booking.book_date === book_date && !(endA <= startB || startA >= endB)
       );
     }) || [];
   console.log(overlappingBookings, id, "overlappingBookings");
@@ -87,9 +108,6 @@ const Booked = ({
   );
   console.log(bookingIndex, "index");
 
-  // const widthPercentage = 100 / overlappingBookings.length;
-  // console.log(widthPercentage, "widthhhh");
-
   const widthPercentage = overlappingBookings.length > 1 ? 50 : 100;
 
   const leftOffset =
@@ -97,6 +115,15 @@ const Booked = ({
       ? (bookingIndex * 50) / (overlappingBookings.length - 1)
       : 0;
   console.log(leftOffset, "leftOffset");
+
+  useEffect(() => {
+    if (itemRef.current) {
+      // Check if the content is overflowing
+      setIsOverflowing(
+        itemRef.current.scrollWidth > itemRef.current.clientWidth
+      );
+    }
+  }, [name, fromTime, toTime, book_by]);
 
   useEffect(() => {
     if (book_by?.id == adminData?.data?.id) {
@@ -124,12 +151,31 @@ const Booked = ({
     const departureTimes = locations
       ?.map((d) => d?.departure_time_format)
       .filter(Boolean);
+    console.log(departureTimes, "departureTime");
 
-    if (departureTimes?.length > 0) {
-      const match = departureTimes[0].match(/(\d+)\s*hr\s*(\d*)/);
+    const departureTime = departureTimes[0]; // Get first valid departure time
+    if (departureTime?.includes("min") && !departureTime?.includes("hr")) {
+      // Only minutes present
+      const match = departureTime?.match(/(\d+)\s*min/);
       if (match) {
-        departureDuration =
-          parseInt(match[1], 10) * 60 + (parseInt(match[2], 10) || 0);
+        departureDuration = parseInt(match[1], 10); // Set minutes directly
+      }
+    } else if (
+      departureTime?.includes("hr") &&
+      !departureTime?.includes("min")
+    ) {
+      // Only hours present
+      const match = departureTime?.match(/(\d+)\s*hr/);
+      if (match) {
+        departureDuration = parseInt(match[1], 10) * 60; // Convert hours to minutes
+      }
+    } else {
+      // Both hours and minutes present
+      const match = departureTime?.match(/(\d+)\s*hr\s*(\d+)\s*min/);
+      if (match) {
+        const hours = parseInt(match[1], 10) * 60;
+        const minutes = parseInt(match[2], 10);
+        departureDuration = hours + minutes;
       }
     }
 
@@ -143,14 +189,50 @@ const Booked = ({
       .filter(Boolean);
 
     if (arrivalTimes?.length > 0) {
-      const match = arrivalTimes[0].match(/(\d+)\s*hr\s*(\d*)/);
-      if (match) {
-        arrivalDuration =
-          parseInt(match[1], 10) * 60 + (parseInt(match[2], 10) || 0);
+      const arrivalTime = arrivalTimes[0]; // Get the first valid return time
+
+      if (arrivalTime?.includes("min") && !arrivalTime?.includes("hr")) {
+        // Only minutes present
+        const match = arrivalTime?.match(/(\d+)\s*min/);
+        if (match) {
+          arrivalDuration = parseInt(match[1], 10);
+        }
+      } else if (arrivalTime?.includes("hr") && !arrivalTime?.includes("min")) {
+        // Only hours present
+        const match = arrivalTime?.match(/(\d+)\s*hr/);
+        if (match) {
+          arrivalDuration = parseInt(match[1], 10) * 60;
+        }
+      } else {
+        // Both hours and minutes present
+        const match = arrivalTime?.match(/(\d+)\s*hr\s*(\d+)\s*min/);
+        if (match) {
+          const hours = parseInt(match[1], 10) * 60;
+          const minutes = parseInt(match[2], 10);
+          arrivalDuration = hours + minutes;
+        }
       }
     }
+
+    console.log(arrivalDuration, "arrivalDuration");
+
     const arrivalTop = endPosition;
     const arrivalHeight = (arrivalDuration / 60) * defaultHeight;
+
+    const departureTimeDisplay = calculateAdjustedTime(
+      fromTime,
+      departureDuration,
+      false
+    );
+    console.log(departureTimeDisplay, "Calculated Departure Time");
+
+    // Calculate Arrival Time
+    const arrivalTimeDisplay = calculateAdjustedTime(
+      toTime,
+      arrivalDuration,
+      true
+    );
+    console.log(arrivalTimeDisplay, "Calculated Arrival Time");
 
     setStyle({
       top: startPosition,
@@ -161,15 +243,19 @@ const Booked = ({
       width: `${widthPercentage}%`,
       left: `${leftOffset}%`,
       position: "absolute",
-      zIndex: hovered ? 50 : 1,
+      zIndex: hovered ? 5 : 1,
       transition: "z-index 0.2s linear",
     });
+    setDepartureTime(departureTimeDisplay);
+    setArrivalTime(arrivalTimeDisplay);
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     setPastBooking(endTimeMinutes <= currentMinutes);
   }, [
     fromTime,
     toTime,
+    locations,
+    status,
     defaultHeight,
     book_by,
     approved_by,
@@ -182,7 +268,9 @@ const Booked = ({
   return (
     <>
       <div>
-        {locations?.some((d) => d?.departure_transport === 1) &&
+        {locations?.some(
+          (d) => d?.departure_transport === 1 && d?.departure_time_format !== ""
+        ) &&
           status === "booked" && (
             <div
               className="absolute  text-xs text-gray-700 bg-white bg-opacity-90 px-1 border border-b-0 border-dashed border-gray-400 rounded-[15px] rounded-b-none w-full shadow-md"
@@ -209,21 +297,21 @@ const Booked = ({
                   transform: "translateY(-50%)",
                 }}
               >
-                {`Departure: ${locations
-                  ?.map((d) => d?.departure_time_format)
-                  .filter(Boolean)
-                  .join(", ")}`}
+                {`Departure: ${departureTime}`}
               </p>
             </div>
           )}
       </div>
       <div
-        className={`booked-item px-3 rounded-md shadow-md flex flex-col border border-[#05445E] bg-white min-h-[30px] cursor-pointer`}
+        className={`booked-item px-3 rounded-[4px] shadow-md flex flex-col border border-[#05445E] bg-white cursor-pointer`}
+        ref={itemRef}
         style={{
           ...style,
           position: "absolute",
           boxSizing: "border-box",
           overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
           backgroundColor:
             status === "pending"
               ? "#d4f1f4"
@@ -233,12 +321,17 @@ const Booked = ({
               ? "#05445E"
               : "#fff",
         }}
+        title={
+          overflowing
+            ? `${name} - ${fromTime} to ${toTime} [${book_by.name}]`
+            : ""
+        }
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <div className="flex justify-between items-center">
           <h4
-            className={`font-bold ${
+            className={`${
               isUser ? "text-[#d4f1f4] font-normal" : "text-[#05445E]"
             } ${status === "pending" ? "text-black" : ""}`}
           >
@@ -254,15 +347,17 @@ const Booked = ({
           )}
         </div>
         <p
-          className={`text-sm ${
+          className={`text-[12px] ${
             isUser ? "text-[#d4f1f4]" : "text-[#05445E]"
           }  ${status === "pending" ? "text-black" : ""}`}
         >
-          {fromTime} - {toTime} [{book_by.name || book_by.email || "Unknown"}]
+          {fromTime} - {toTime} [{book_by.name}]
         </p>
       </div>
       <div>
-        {locations?.some((d) => d?.return_transport === 1) &&
+        {locations?.some(
+          (d) => d?.return_transport === 1 && d?.return_time_format !== ""
+        ) &&
           status === "booked" && (
             <div
               className="absolute text-xs text-gray-700 bg-white bg-opacity-90  py-1 border border-dashed border-t-0 border-gray-400 rounded-[15px] rounded-t-none w-full"
@@ -289,10 +384,11 @@ const Booked = ({
                   left: "20px",
                 }}
               >
-                {`Arrival: ${locations
+                {/* {`Arrival: ${locations
                   ?.map((d) => d?.return_time_format)
                   .filter(Boolean)
-                  .join(", ")}`}
+                  .join(", ")}`} */}
+                {`Arrival: ${arrivalTime}`}
               </p>
             </div>
           )}

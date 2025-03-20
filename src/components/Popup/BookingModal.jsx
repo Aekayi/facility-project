@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
+  console.log(booking, "booking////////");
   const loggedInUserId = useSelector((state) => state.auth.id);
   const loggedIn = useSelector((state) => state.auth);
   console.log(loggedIn, "loggedIn");
@@ -35,30 +36,30 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
     { data: approvedData, isError: approvedError, isLoading: approvedLoading },
   ] = useApprovedBookingMutation();
 
-  const handleApproved = async (status) => {
-    try {
-      console.log("Update booking status");
-      await approvedBooking({ bookingId: booking.id, status }).unwrap();
-      toast.info(
-        `Booking ${status === 1 ? "approved" : "canceled"} successfully`,
-        {
-          style: { backgroundColor: "#d4f1f4", color: "#05445e" },
-          progressStyle: {
-            background: "#05445e",
-          },
-        }
-      );
-      console.log("Toast success should display");
-      setTimeout(() => {
-        onClose();
-      }, 2000);
-    } catch (error) {
-      toast.error("Failed to update booking status");
-      setTimeout(() => {
-        onClose();
-      }, 2000);
-    }
-  };
+  // const handleApproved = async (status) => {
+  //   try {
+  //     console.log("Update booking status");
+  //     await approvedBooking({ bookingId: booking.id, status }).unwrap();
+  //     toast.info(
+  //       `Booking ${status === 1 ? "approved" : "canceled"} successfully`,
+  //       {
+  //         style: { backgroundColor: "#d4f1f4", color: "#05445e" },
+  //         progressStyle: {
+  //           background: "#05445e",
+  //         },
+  //       }
+  //     );
+  //     console.log("Toast success should display");
+  //     setTimeout(() => {
+  //       onClose();
+  //     }, 2000);
+  //   } catch (error) {
+  //     toast.error("Failed to update booking status");
+  //     setTimeout(() => {
+  //       onClose();
+  //     }, 2000);
+  //   }
+  // };
 
   const handleOutsideClick = useCallback(
     (e) => {
@@ -125,7 +126,7 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
             </div>
           ) : (
             <>
-              {canEdit && (
+              {canEdit && isOwner && (
                 <div className="flex justify-end space-x-6">
                   <button
                     className="px-4 py-2 radius-lg hover:bg-white hover:radius-lg hover:shadow-lg"
@@ -220,16 +221,28 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
                     </div>
                   )}
                   {booking?.locations.length > 0 && (
-                    <div>
-                      <p className="text-semibold">Locations</p>
-                      {locations.map((location, index) => (
+                    <>
+                      <div>
+                        <p className="text-semibold">Locations</p>
+                        {locations.map((location, index) => (
+                          <div className="border border-gray-300 p-3 rounded-md mb-2">
+                            <span key={index} className="text-sm text-gray-600">
+                              {location.address}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+                        <p className="text-semibold">Manager's Remark</p>
                         <div className="border border-gray-300 p-3 rounded-md mb-2">
-                          <span key={index} className="text-sm text-gray-600">
-                            {location.address}
+                          <span className="text-sm text-gray-600">
+                            {locations.length > 0 && locations[0].remark
+                              ? locations[0].remark
+                              : "-"}
                           </span>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    </>
                   )}
 
                   {booking?.approved_by > 0 && (
@@ -242,8 +255,8 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
                       ))}
                     </div>
                   )}
-                  <div className="mt-4 flex justify-between">
-                    <div className="flex gap-4">
+                  <div className="mt-4 flex justify-end">
+                    {/* <div className="flex gap-4">
                       {approvedId !== undefined && needApproval && (
                         <>
                           {booking?.status !== "booked" && (
@@ -264,7 +277,7 @@ const BookingModal = ({ booking, onClose, onEdit, onDelete }) => {
                           )}
                         </>
                       )}
-                    </div>
+                    </div> */}
                     <button
                       className="px-4 py-1 bg-[#d4f1f4] text-[#05445E] rounded transition shadow-md"
                       onClick={onClose}

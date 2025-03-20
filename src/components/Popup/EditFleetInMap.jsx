@@ -7,9 +7,7 @@ import {
   useDeleteBookingMutation,
 } from "../../apps/features/apiSlice";
 import dayjs from "dayjs";
-// import customParseFormat from "dayjs/plugin/customParseFormat";
 
-// dayjs.extend(customParseFormat);
 import duration from "../../assets/public/duration.json";
 import { toast } from "react-toastify";
 import timeList from "../../assets/public/time.json";
@@ -41,9 +39,9 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
     bookingDetails?.facility_id?.id
   );
   const [departure, setDeparture] = useState(true);
-  const [departureDuration, setDepatureDuration] = useState("1:00");
+  const [departureDuration, setDepatureDuration] = useState("");
   const [returnTransport, setReturnTransport] = useState(true);
-  const [arrivalDuration, setArrivalDuration] = useState("1:00");
+  const [arrivalDuration, setArrivalDuration] = useState("");
   const [approve, setApprove] = useState(true);
   const [note, setNote] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -75,7 +73,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
     if (depatureTime) {
       setDepatureDuration(depatureTime);
     } else {
-      setDepatureDuration("1:00");
+      setDepatureDuration("");
     }
     const arrivalTime = bookingDetails?.locations?.find(
       (r) => r?.return_time
@@ -83,7 +81,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
     if (arrivalTime) {
       setArrivalDuration(arrivalTime);
     } else {
-      setArrivalDuration("1:00");
+      setArrivalDuration("");
     }
   }, [bookingDetails]);
 
@@ -146,7 +144,6 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
         data: updatedData,
         bookingId: selectedBookingId,
       }).unwrap();
-      console.log("Booking updated successfully:", response);
       setShowSuccessModal(true);
       refetch();
       setTimeout(() => {
@@ -159,8 +156,8 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
       setSelectedDate(updatedData.book_date);
       setDeparture(updatedData.departure_transport);
       setReturnTransport(updatedData.return_transport);
-      setDepatureDuration(updatedData.departure_time);
-      setArrivalDuration(updatedData.return_time);
+      // setDepatureDuration(updatedData.departure_time);
+      // setArrivalDuration(updatedData.return_time);
       setApprove(updatedData.status);
       setNote(updatedData.remark);
     } catch (error) {
@@ -231,13 +228,21 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
       </div>
       <div className="mb-4 flex flex-row items-start space-x-2">
         <img src={LocalIcon.People} alt="" />
-        <ul className="text-[14px] space-y-1">
+        <ul className="text-[14px] flex flex-wrap gap-x-4 gap-y-2">
           {bookingDetails?.participants?.map((participant, index) => (
             <li key={index} className="flex items-center space-x-2">
               <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#05445E] text-white text-sm">
                 {participant?.name?.charAt(0).toUpperCase()}
               </span>
               <span>{participant.name}</span>
+            </li>
+          ))}
+          {bookingDetails?.guests?.map((guest, index) => (
+            <li key={index} className="flex items-center space-x-2">
+              <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#05445E] text-white text-sm">
+                {guest?.name?.charAt(0).toUpperCase()}
+              </span>
+              <span className="text-[#0E0E0E]">{guest.name}</span>
             </li>
           ))}
         </ul>
@@ -353,10 +358,15 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           </label>
           <select
             name="departure-duration"
-            value={departureDuration}
+            value={departureDuration || "00:00"}
             onChange={(e) => setDepatureDuration(e.target.value)}
             className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
+            {!departureDuration && (
+              <option value="00:00" disabled>
+                00:00
+              </option>
+            )}
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
                 {time.time}:{time.minute}
@@ -375,7 +385,7 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
             onChange={(e) => setReturnTransport(e.target.checked)}
           />
           <label
-            htmlFor="departure"
+            htmlFor="arrival"
             className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Arrival
@@ -390,10 +400,15 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
           </label>
           <select
             name="arrival-duration"
-            value={arrivalDuration}
+            value={arrivalDuration || "00:00"}
             onChange={(e) => setArrivalDuration(e.target.value)}
             className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
+            {!arrivalDuration && (
+              <option value="00:00" disabled>
+                00:00
+              </option>
+            )}
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
                 {time.time}:{time.minute}
@@ -406,13 +421,13 @@ function EditFleetInMap({ selectedBookingId, onClose }) {
         <div className="flex justify-start items-center gap-2">
           <input
             type="checkbox"
-            id="arrival"
+            id="approve"
             checked={approve}
             onChange={(e) => setApprove(e.target.checked)}
             className="w-4 h-4 rounded focus:outline-none cursor-pointer"
           />
           <label
-            htmlFor="departure"
+            htmlFor="approve"
             className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Approve

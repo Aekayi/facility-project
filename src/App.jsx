@@ -12,8 +12,23 @@ import BookingRecords from "./pages/Records/BookingRecords";
 import { ToastContainer } from "react-toastify";
 import BookingsForApprove from "./components/BookedListForManager/BookingsForApprove";
 import ReservationMap from "./pages/ReservationMap/ReservationMap";
+import OneSignal from "react-onesignal";
+import { useEffect } from "react";
 
 function App() {
+  // useEffect(() => {
+  //   // Ensure this code runs only on the client side
+  //   if (typeof window !== "undefined") {
+  //     OneSignal.init({
+  //       appId: "c50253fe-1594-46ee-8ba3-c1f53f2601cd",
+  //       // You can add other initialization options here
+  //       notifyButton: {
+  //         enable: true,
+  //       },
+  //     });
+  //   }
+  // }, []);
+
   return (
     <div className="layout h-full bg-[#d4f1f4]">
       <div className="flex flex-col justify-center items-center">

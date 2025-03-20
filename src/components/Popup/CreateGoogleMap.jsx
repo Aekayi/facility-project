@@ -36,6 +36,7 @@ const CreateGoogleMap = ({ onLocationSelect }) => {
       //   "nameeeeeeee"
       // );
       if (data.results.length > 0) {
+        console.log(data.results, "fffff");
         return data.results[0].address_components[0].long_name;
       }
       return "Unknown Location";
@@ -57,8 +58,6 @@ const CreateGoogleMap = ({ onLocationSelect }) => {
       newLocation.lng
     );
     setSelectedLocation(newLocation);
-    // setSearchValue(formattedAddress); // Update input field
-    // console.log(searchValue, "searchValue");
 
     // Pass data to parent component
     onLocationSelect({

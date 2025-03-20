@@ -24,6 +24,12 @@ const NewLocation = ({
 
   const apiKey = "AIzaSyB7fbPdevYiD3SB3wmlvZ36ubTH3Y--qGE";
 
+  useEffect(() => {
+    setSelectedLocation(center);
+    setLocationName("");
+    setLocationAddress("");
+  }, [setNewLocationModal]);
+
   const fetchCoordinates = async (address) => {
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(

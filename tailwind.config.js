@@ -16,6 +16,9 @@ module.exports = {
       fontFamily: {
         manrope: ["Manrope", "sans-serif"], // Change to your desired font family
       },
+      boxShadow: {
+        'custom': '0px 10px 10px rgba(0, 0, 0, 0.5)',
+      }
     },
   },
   plugins: [require('tailwind-scrollbar')],

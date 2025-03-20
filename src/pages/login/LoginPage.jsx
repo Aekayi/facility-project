@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import logo from "../../assets/logo.png";
+import React, { useContext, useState } from "react";
+import weblogo from "../../assets/weblogo.png";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useLoginMutation } from "../../apps/features/apiSlice";
@@ -7,13 +7,17 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../apps/features/AuthSlice";
 import { UserContext } from "../../context/userContext";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 const LoginPage = () => {
-  const [login, { isLoading, isError, error }] = useLoginMutation();
+  const [login, { isLoading, isError }] = useLoginMutation();
   const { setUser } = useContext(UserContext);
   console.log("set", setUser);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -23,13 +27,19 @@ const LoginPage = () => {
     validationSchema: Yup.object({
       email: Yup.string().required("username or email is required"),
       password: Yup.string()
-        .min(6, "Password must be at least 6 characters")
+        .min(8, "Password must be at least 8 characters")
         .required("Password is required"),
     }),
     onSubmit: async (values) => {
+      setErrorMessage("");
       try {
         const response = await login(values).unwrap();
         console.log("response", response);
+
+        if (!response.status) {
+          setErrorMessage(response.message);
+          return;
+        }
         dispatch(
           setCredentials({
             id: response.data.user.id,
@@ -41,7 +51,9 @@ const LoginPage = () => {
         navigate("/");
       } catch (err) {
         console.error("Login Failed:", err);
-        // alert(err.data?.message || "Login failed. Please try again.");
+        setErrorMessage(
+          err?.data?.message || "Login failed. Please try again."
+        );
       }
     },
   });
@@ -52,8 +64,16 @@ const LoginPage = () => {
       onSubmit={formik.handleSubmit}
     >
       <div className="mt-10 flex flex-col items-center">
-        <img src={logo} alt="Logo" className="mb-4" />
-        <h4 className="text-2xl font-semibold mb-4">Welcome !</h4>
+        <img
+          src={weblogo}
+          alt="weblogo"
+          className="mb-4"
+          width={100}
+          height={100}
+        />
+        <h4 className="text-2xl font-semibold mb-4 text-[#b6d26f]">
+          Welcome !
+        </h4>
       </div>
       <div className="mb-4">
         <input
@@ -71,17 +91,24 @@ const LoginPage = () => {
         ) : null}
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 relative">
         <input
           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter Password"
           id="password"
           name="password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           value={formik.values.password}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute top-2 right-3 flex justify-center items-center text-gray-600"
+        >
+          {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+        </button>
         {formik.touched.password && formik.errors.password ? (
           <div className="text-yellow-600">{formik.errors.password}</div>
         ) : null}
@@ -96,11 +123,8 @@ const LoginPage = () => {
           {isLoading ? "Logging in..." : "Login"}
         </button>
 
-        {isError && (
-          <div className="text-red-600">
-            Error:{" "}
-            {error?.data?.message || "Access Denide : Invalid Crendtials"}
-          </div>
+        {errorMessage && (
+          <div className="text-red-600 mt-2">{errorMessage}</div>
         )}
       </div>
     </form>

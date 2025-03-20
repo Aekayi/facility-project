@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import timeList from "../../assets/public/time.json";
 import duration from "../../assets/public/duration.json";
 import LocalIcon from "../../assets/icons";
@@ -7,19 +7,16 @@ import {
   useFacilitynamesQuery,
   useUpdateBookingMutation,
 } from "../../apps/features/apiSlice";
-import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { set } from "date-fns";
 
-function EditBookingForFleet({
-  fleetBookedList,
-  selectedBooking,
-  setSelectedBooking,
-}) {
+function EditBookingForFleet({ selectedBooking }) {
+  const mapRef = useRef(null);
   const timeArr = timeList?.detailTime;
   const durationTime = duration?.duration;
 
+  const [booking, setBooking] = useState(selectedBooking);
+  const [hasChanges, setHasChanges] = useState(false);
   const [startTime, setStartTime] = useState(
     selectedBooking?.start_time
       ?.replace("PM", "pm")
@@ -34,9 +31,9 @@ function EditBookingForFleet({
   );
   const [selectedDate, setSelectedDate] = useState("");
   const [departure, setDeparture] = useState(true);
-  const [departureDuration, setDepatureDuration] = useState("1:00");
+  const [departureDuration, setDepatureDuration] = useState("");
   const [returnTransport, setReturnTransport] = useState(true);
-  const [arrivalDuration, setArrivalDuration] = useState("1:00");
+  const [arrivalDuration, setArrivalDuration] = useState("");
   const [approve, setApprove] = useState(true);
   const [note, setNote] = useState("");
   const [selectedFacility, setSelectedFacility] = useState(
@@ -44,6 +41,62 @@ function EditBookingForFleet({
   );
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showUpdatedModal, setShowUpdatedModal] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [mapUrl, setMapUrl] = useState("");
+
+  const locations = selectedBooking?.locations;
+
+  const loadGoogleMaps = () => {
+    if (!window.google) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB7fbPdevYiD3SB3wmlvZ36ubTH3Y--qGE&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+      script.onload = initMap;
+    } else {
+      initMap();
+    }
+  };
+
+  useEffect(() => {
+    // if (locations.length > 0) {
+    //   const lat = parseFloat(locations[0]?.latitude); // Convert string to number
+    //   const lng = parseFloat(locations[0]?.longitude);
+    //   if (!isNaN(lat) && !isNaN(lng)) {
+    //     setMapUrl(
+    //       `https://www.google.com/maps/embed/v1/place?key=AIzaSyB7fbPdevYiD3SB3wmlvZ36ubTH3Y--qGE&q=${lat},${lng}`
+    //     );
+    //   }
+    // }
+    if (showMapModal && locations.length > 0) {
+      loadGoogleMaps();
+    }
+  }, [locations, showMapModal]);
+
+  const initMap = () => {
+    if (locations.length === 0 || !mapRef.current) return;
+
+    const map = new window.google.maps.Map(mapRef.current, {
+      center: {
+        lat: parseFloat(locations[0].latitude),
+        lng: parseFloat(locations[0].longitude),
+      },
+      zoom: 14,
+    });
+
+    locations.forEach((location) => {
+      new window.google.maps.Marker({
+        position: {
+          lat: parseFloat(location.latitude),
+          lng: parseFloat(location.longitude),
+        },
+        map,
+        title: location.name,
+      });
+    });
+  };
 
   useEffect(() => {
     const hasDeparture = selectedBooking?.locations?.some(
@@ -67,10 +120,12 @@ function EditBookingForFleet({
     const depatureTime = selectedBooking?.locations?.find(
       (l) => l?.departure_time
     )?.departure_time;
+    console.log(depatureTime, "depatureTimeeeee");
     if (depatureTime) {
       setDepatureDuration(depatureTime);
+      console.log(departureDuration, "depatureDuration");
     } else {
-      setDepatureDuration("1:00");
+      setDepatureDuration("");
     }
     const arrivalTime = selectedBooking?.locations?.find(
       (r) => r?.return_time
@@ -78,9 +133,11 @@ function EditBookingForFleet({
     if (arrivalTime) {
       setArrivalDuration(arrivalTime);
     } else {
-      setArrivalDuration("1:00");
+      setArrivalDuration("");
     }
   }, [selectedBooking]);
+
+  console.log(selectedBooking, "selectedBooking////", departureDuration);
 
   useEffect(() => {
     if (selectedBooking) {
@@ -101,16 +158,6 @@ function EditBookingForFleet({
     }
   }, [selectedBooking]);
 
-  // const isPastBooking = () => {
-  //   const now = dayjs(); // Current date & time
-  //   const selectedDateTime = dayjs(
-  //     `${selectedDate} ${startTime}`,
-  //     "YYYY-MM-DD HH:mm"
-  //   );
-
-  //   return selectedDateTime.isBefore(now); // Check if booking is in the past
-  // };
-
   const [
     updateBooking,
     {
@@ -119,6 +166,13 @@ function EditBookingForFleet({
       isSuccess: updateSuccess,
     },
   ] = useUpdateBookingMutation();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    const updatedData = { ...booking, [name]: value };
+
+    setBooking(updatedData);
+  };
 
   const handleUpdateBooking = async () => {
     const updatedData = {
@@ -131,8 +185,8 @@ function EditBookingForFleet({
       facility_id: selectedFacility || selectedBooking?.facility_id?.id,
       departure_transport: departure ? true : false,
       return_transport: returnTransport ? true : false,
-      departure_time: departureDuration,
-      return_time: arrivalDuration,
+      departure_time: !approve ? "" : departureDuration,
+      return_time: !approve ? "" : arrivalDuration,
       status: approve ? 1 : 0,
       remark: note,
       book_by: selectedBooking?.book_by?.id,
@@ -151,21 +205,20 @@ function EditBookingForFleet({
         data: updatedData,
         bookingId: selectedBooking?.id,
       }).unwrap();
-      if (response?.status === false) {
-        alert(response?.message);
-        setShowSuccessModal(false);
-      } else {
+      console.log(response, "responseeeee");
+      if (response?.status === true && updatedData.status === 1) {
         setShowSuccessModal(true);
+      } else if (response?.status === true && updatedData.status === 0) {
+        setShowUpdatedModal(true);
+      } else {
+        setShowSuccessModal(false);
+        setShowUpdatedModal(false);
       }
 
-      setStartTime(updatedData.start_time);
-      setEndTime(updatedData.end_time);
       setSelectedFacility(updatedData.facility_id);
       setSelectedDate(updatedData.book_date);
       setDeparture(updatedData.departure_transport);
       setReturnTransport(updatedData.return_transport);
-      setDepatureDuration(updatedData.departure_time);
-      setArrivalDuration(updatedData.return_time);
       setApprove(updatedData.status);
       setNote(updatedData.remark);
     } catch (error) {
@@ -223,33 +276,59 @@ function EditBookingForFleet({
       <div className="mb-4 flex flex-row items-center space-x-2">
         <img src={LocalIcon.Profile} alt="" />
         <div
-          contentEditable={false} // Prevent editing
+          contentEditable={false}
           className="w-full focus:outline-none text-[#05445E] text-[14px]"
-          style={{ cursor: "default" }} // To indicate it is read-only
+          style={{ cursor: "default" }}
         >
           <span style={{ color: "black" }}>Booked By: </span>
           <span>{selectedBooking?.book_by?.name || ""}</span>
         </div>
       </div>
-
-      <div className="mb-4 flex flex-row items-center space-x-2">
-        <img src={LocalIcon.Location} alt="" />
-        <input
-          type="text"
-          value={selectedBooking?.locations?.map((location) => location.name)}
-          className="w-full focus:outline-none text-[#0E0E0E] placeholder:text-gray-400 text-[14px]"
-          readOnly
-        />
+      <div>
+        <div
+          className="mb-4 flex flex-row items-center space-x-2 cursor-pointer"
+          onClick={() => setShowMapModal(true)}
+        >
+          <img src={LocalIcon.Location} alt="" />
+          <input
+            type="text"
+            value={selectedBooking?.locations?.map((location) => location.name)}
+            className="w-full focus:outline-none text-[#05445E] placeholder:text-gray-400 text-[14px] cursor-pointer"
+            readOnly
+          />
+        </div>
+        {showMapModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg p-4 w-[500px] relative">
+              <h2 className="text-lg font-semibold mb-2">Location Map</h2>
+              <button
+                className="absolute top-2 right-2 bg-gray-200 px-2 py-1 rounded"
+                onClick={() => setShowMapModal(false)}
+              >
+                ✖
+              </button>
+              <div ref={mapRef} className="w-full h-[350px]" />
+            </div>
+          </div>
+        )}
       </div>
       <div className="mb-4 flex flex-row items-start space-x-2">
         <img src={LocalIcon.People} alt="" />
-        <ul className="text-[14px] space-y-1">
+        <ul className="text-[14px] flex flex-wrap gap-x-4 gap-y-2">
           {selectedBooking?.participants?.map((participant, index) => (
             <li key={index} className="flex items-center space-x-2">
               <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#05445E] text-white text-sm">
                 {participant?.name?.charAt(0).toUpperCase()}
               </span>
               <span className="text-[#0E0E0E]">{participant.name}</span>
+            </li>
+          ))}
+          {selectedBooking?.guests?.map((guest, index) => (
+            <li key={index} className="flex items-center space-x-2">
+              <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#05445E] text-white text-sm">
+                {guest?.name?.charAt(0).toUpperCase()}
+              </span>
+              <span className="text-[#0E0E0E]">{guest.name}</span>
             </li>
           ))}
         </ul>
@@ -268,7 +347,7 @@ function EditBookingForFleet({
         <input
           type="date"
           value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          onChange={handleInputChange}
           className="appearance-none bg-white border border-[#454545] text-[#0E0E0E] rounded-md p-2 focus:outline-none cursor-pointer text-[13px]"
         />
       </div>
@@ -307,7 +386,7 @@ function EditBookingForFleet({
                     `${t.time}:${t.minute} ${t.period}` ===
                     `${time.time}:${time.minute} ${time.period}`
                 );
-                return currentIndex > startIndex; // Only show times after start time
+                return currentIndex > startIndex;
               })
               .map((time, key) => (
                 <option
@@ -346,8 +425,11 @@ function EditBookingForFleet({
             id="departure"
             className="w-4 h-4 rounded focus:outline-none cursor-pointer"
             checked={departure}
-            onChange={(e) => setDeparture(e.target.checked)}
+            onChange={(e) => {
+              setDeparture(e.target.checked);
+            }}
           />
+          {console.log(departure, "eeeeeee")}
           <label
             htmlFor="departure"
             className="text-[#0E0E0E] cursor-pointer text-[13px]"
@@ -362,12 +444,21 @@ function EditBookingForFleet({
           >
             Duration
           </label>
+          {console.log("departure duration......", departureDuration)}
           <select
             name="departure-duration"
-            value={departureDuration}
-            onChange={(e) => setDepatureDuration(e.target.value)}
-            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
+            value={departureDuration || "00:00"}
+            onChange={(e) => {
+              setDepatureDuration(e.target.value);
+              console.log(departureDuration, "departureDuration.....");
+            }}
+            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md py-1 px-2 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
+            {!departureDuration && (
+              <option value="00:00" disabled>
+                00:00
+              </option>
+            )}
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
                 {time.time}:{time.minute}
@@ -383,11 +474,13 @@ function EditBookingForFleet({
             id="arrival"
             className="w-4 h-4 rounded focus:outline-none cursor-pointer"
             checked={returnTransport}
-            onChange={(e) => setReturnTransport(e.target.checked)}
+            onChange={(e) => {
+              setReturnTransport(e.target.checked);
+            }}
           />
           <label
-            htmlFor="departure"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            htmlFor="arrival"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Arrival
           </label>
@@ -401,10 +494,15 @@ function EditBookingForFleet({
           </label>
           <select
             name="arrival-duration"
-            value={arrivalDuration}
+            value={arrivalDuration === "" ? "00:00" : arrivalDuration}
             onChange={(e) => setArrivalDuration(e.target.value)}
-            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md p-1 focus:outline-none text-[#0E0E0E] text-[13px]"
+            className="custom-dropdown overflow-auto border-[1px] border-[#454545] bg-white outline-none rounded-md py-1 px-2 focus:outline-none text-[#0E0E0E] text-[13px]"
           >
+            {arrivalDuration === "" && (
+              <option value="00:00" disabled>
+                00:00
+              </option>
+            )}
             {durationTime?.map((time, index) => (
               <option value={`${time.time}:${time.minute}`} key={index}>
                 {time.time}:{time.minute}
@@ -417,14 +515,14 @@ function EditBookingForFleet({
         <div className="flex justify-start items-center gap-2">
           <input
             type="checkbox"
-            id="arrival"
+            id="approve"
             checked={approve}
             onChange={(e) => setApprove(e.target.checked)}
             className="w-4 h-4 rounded focus:outline-none cursor-pointer"
           />
           <label
-            htmlFor="departure"
-            className="text-gray-700 cursor-pointer text-[13px]"
+            htmlFor="approve"
+            className="text-[#0E0E0E] cursor-pointer text-[13px]"
           >
             Approve
           </label>
@@ -437,6 +535,7 @@ function EditBookingForFleet({
           value={note}
           onChange={(e) => setNote(e.target.value)}
           className="border border-[#454545] rounded-md w-full focus:outline-none p-2 text-gray-700 text-[13px]"
+          placeholder="Remark"
         >
           Remark
         </textarea>
@@ -447,7 +546,7 @@ function EditBookingForFleet({
             className="bg-[#FF7878] px-[10px] py-2 w-full rounded-[6px]"
             onClick={() => setShowDeleteModal(true)}
           >
-            {deleteLoading ? "Deleting..." : "Delete"}
+            Delete
           </button>
           {showDeleteModal && (
             <div
@@ -473,8 +572,9 @@ function EditBookingForFleet({
                   <button
                     onClick={confirmDelete}
                     className="px-6 py-2 w-full bg-[#FF7878] rounded"
+                    disabled={deleteLoading}
                   >
-                    Delete
+                    {deleteLoading ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
@@ -492,10 +592,11 @@ function EditBookingForFleet({
           {showSuccessModal && (
             <div
               className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-              onClick={() => setShowSuccessModal(false)} // Close when clicking outside
+              onClick={() => setShowSuccessModal(false)}
             >
               <div
-                className="bg-white p-4 rounded-lg shadow-md w-[350px] border-t-[10px] border-[#86E4AE]"
+                className="bg-white p-4 rounded-lg shadow-md
+                 w-[350px] border-t-[10px] border-[#86E4AE]"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex justify-between items-center">
@@ -518,6 +619,40 @@ function EditBookingForFleet({
                 </div>
                 <p className="text-[14px] mt-2">
                   You have successfully approved the booking.
+                </p>
+              </div>
+            </div>
+          )}
+          {showUpdatedModal && (
+            <div
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+              onClick={() => setShowUpdatedModal(false)}
+            >
+              <div
+                className="bg-white p-4 rounded-lg shadow-md
+                 w-[350px] border-t-[10px] border-[#86E4AE]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center">
+                  <h2 className="text-[20px]">Booking Updated</h2>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-5 cursor-pointer"
+                    onClick={() => setShowUpdatedModal(false)}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18 18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+                <p className="text-[14px] mt-2">
+                  You have successfully updated the booking.
                 </p>
               </div>
             </div>

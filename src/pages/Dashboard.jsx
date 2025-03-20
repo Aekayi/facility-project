@@ -26,7 +26,7 @@ const Dashboard = () => {
         </div>
       ) : (
         <div className="m-4">
-          <div className="container flex justify-between items-center py-3 px-4 mb-4 border border-gray-300 shadow rounded">
+          <div className="container flex justify-between items-center py-2 px-4 mb-4 border border-gray-300 shadow rounded">
             <h1 className="text-xl font-semibold text-[#05445E]">
               Types of Facility
             </h1>

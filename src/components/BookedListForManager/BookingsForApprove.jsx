@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
-// import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {
   useFacilitynamesQuery,
@@ -23,6 +22,8 @@ import TimeListForFleet from "./TimeListForFleet";
 import LocalIcon from "../../assets/icons";
 import { useSelector } from "react-redux";
 import ProfileSetting from "./ProfileSetting";
+import Loading from "../loading/Loading";
+import { ref } from "yup";
 
 dayjs.extend(isSameOrAfter);
 
@@ -39,7 +40,7 @@ function BookingsForApprove() {
   const [bookedListByDate, setBookedListByDate] = useState(
     dayjs(selectedDate).format("YYYY-MM-DD")
   );
-  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const formatDate = (date) => {
     return dayjs(date).format("YYYY-MM-DD");
   };
@@ -55,7 +56,6 @@ function BookingsForApprove() {
     setSelectedDate((prev) => prev.add(1, "day"));
   };
   let current_date = formatDate(new Date());
-  console.log(current_date, "current_date");
   const current_time = Number(dayjs().format("HH"));
 
   const now = new Date();
@@ -80,14 +80,7 @@ function BookingsForApprove() {
     date: formatDate(selectedDate),
   });
 
-  const {
-    data: users,
-    isLoading: userLoading,
-    isError: userError,
-  } = useUsersQuery();
-
   const loginUser = useSelector((state) => state.auth.role);
-  console.log(loginUser, "loginUser");
   const username = loginUser[0]?.name;
 
   useEffect(() => {
@@ -100,7 +93,15 @@ function BookingsForApprove() {
     : [];
 
   const handleBookingSelect = (booking) => {
-    setSelectedBooking(booking);
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setSelectedBooking(booking);
+    }, 1000);
+  };
+  const handleLogoClick = () => {
+    navigate("/");
   };
   return (
     <>
@@ -113,6 +114,8 @@ function BookingsForApprove() {
               srcset=""
               width="110px"
               height="39.93px"
+              onClick={handleLogoClick}
+              className="cursor-pointer"
             />
             <h3 className="text-xl font-semibold">Booking Management</h3>
           </div>
@@ -168,12 +171,36 @@ function BookingsForApprove() {
           <div className="flex justify-center items-center p-4 w-full">
             <div className="grid grid-cols-[30%_70%] gap-2 w-full">
               {/* Left Column */}
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <EditBookingForFleet
-                  fleetBookedList={bookedList || []}
-                  selectedBooking={selectedBooking}
-                  setSelectedBooking={setSelectedBooking}
-                />
+              <div className="bg-white p-4 rounded-lg shadow-lg">
+                {loading ? (
+                  <div className="flex justify-center items-center h-screen">
+                    <Loading />
+                  </div>
+                ) : selectedBooking ? (
+                  <EditBookingForFleet
+                    fleetBookedList={bookedList || []}
+                    selectedBooking={selectedBooking}
+                    setSelectedBooking={setSelectedBooking}
+                  />
+                ) : (
+                  <>
+                    <div className="flex flex-col justify-start items-start">
+                      <span className="text-[20px] font-normal">Manage</span>
+                      <span className="text-[30px] font-bold">Booking</span>
+                    </div>
+                    <div className="flex flex-col justify-center items-center h-screen space-y-4">
+                      <img
+                        src={LocalIcon.Group}
+                        alt="Group"
+                        width={"357.16px"}
+                        height={"297.45px"}
+                      />
+                      <span className="flex justify-center items-center w-full text-center text-[16px]">
+                        Choose the booking you wish to manage
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Right Column */}

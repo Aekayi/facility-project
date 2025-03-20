@@ -10,11 +10,12 @@ import AddPeople from "./AddPeople";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../loading/Loading";
-import { data } from "autoprefixer";
-import GoogleMapComponent from "./GoogleMapComponent";
+import CreateGoogleMap from "./CreateGoogleMap";
 import NewLocation from "./NewLocation";
 import LocalIcon from "../../assets/icons";
 import timeList from "../../assets/public/time.json";
+import { ClearIcon } from "@mui/x-date-pickers";
+import { AiOutlineUsergroupAdd } from "react-icons/ai";
 
 const EditModal = ({ booking, onClose }) => {
   const timeArr = timeList?.detailTime;
@@ -45,6 +46,8 @@ const EditModal = ({ booking, onClose }) => {
   const [selectedDate, setSelectedDate] = useState(booking?.book_date || "");
   const [participants, setParticipants] = useState(booking?.participants || []);
   const [guests, setGuests] = useState(booking?.guests || []);
+  const [inputValue, setInputValue] = useState("");
+
   const [addPerson, setAddPerson] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [filteredPeople, setFilteredPeople] = useState([]);
@@ -58,24 +61,6 @@ const EditModal = ({ booking, onClose }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [location, setLocation] = useState(booking?.locations || "");
 
-  // const convertTo24HourFormat = (time12h) => {
-  //   const [time, modifier] = time12h.split(" ");
-  //   let [hours, minutes] = time.split(":");
-
-  //   if (modifier === "PM" && hours !== "12") {
-  //     hours = parseInt(hours, 10) + 12;
-  //   }
-  //   if (modifier === "AM" && hours === "12") {
-  //     hours = "00";
-  //   }
-
-  //   return `${hours}:${minutes}`;
-  // };
-
-  // const formattedStartTime = startTime ? convertTo24HourFormat(startTime) : "";
-  // console.log(formattedStartTime, "formattedStartTime");
-  // const formattedEndTime = endTime ? convertTo24HourFormat(endTime) : "";
-
   const [
     updateBooking,
     {
@@ -85,7 +70,7 @@ const EditModal = ({ booking, onClose }) => {
     },
   ] = useUpdateBookingMutation();
 
-  const { data: roomDetails } = useFacilityidQuery(facilityByRoomId);
+  // const { data: roomDetails } = useFacilityidQuery(facilityByRoomId);
 
   const {
     data: facilityData,
@@ -115,6 +100,18 @@ const EditModal = ({ booking, onClose }) => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [handleOutsideClick]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && inputValue.trim() !== "") {
+      setGuests([...guests, { email: inputValue.trim() }]);
+      setInputValue("");
+    }
+  };
+
+  const removeGuest = (index) => {
+    setGuests(guests.filter((_, i) => i !== index));
+  };
+
   const participantsId = participants
     ?.filter((filter) => filter.id)
     .map((participant) => participant.id);
@@ -135,7 +132,7 @@ const EditModal = ({ booking, onClose }) => {
       facility_id: facility,
       locations: location ? location : [],
       book_by: bookBy,
-      guests: guests?.map((guest) => guest.email), // Assuming guests are just names
+      guests: guests?.map((guest) => guest.email),
     };
     console.log(updatedBooking, "updatedbooking...");
     try {
@@ -145,7 +142,10 @@ const EditModal = ({ booking, onClose }) => {
       }).unwrap();
       if (response.status === false) {
         setSuccess(false);
-        toast.error("Error updating booking");
+        toast.error(response.message);
+        setTimeout(() => {
+          onClose();
+        }, 1000);
       } else {
         setSuccess(true);
         toast.info("Booking updated successfully!", {
@@ -154,6 +154,9 @@ const EditModal = ({ booking, onClose }) => {
             background: "#05445e",
           },
         });
+        setTimeout(() => {
+          onClose();
+        }, 1000);
       }
     } catch (error) {
       console.error("Failed to update booking:", error);
@@ -201,7 +204,7 @@ const EditModal = ({ booking, onClose }) => {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className=" border-b border-gray-300 w-full focus:outline-none text-gray-500 placeholder:text-gray-400"
+                className=" border-b border-gray-500 w-full focus:outline-none text-gray-500 placeholder:text-gray-400"
               />
             </div>
             <div className="mb-6 flex flex-row items-center space-x-6">
@@ -222,13 +225,13 @@ const EditModal = ({ booking, onClose }) => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="border border-gray-300 w-full focus:outline-none text-gray-500 placeholder:text-gray-400"
+                className="border-b border-gray-500 w-full focus:outline-none text-gray-500 placeholder:text-gray-400"
               />
             </div>
             <div className="create-edit-container flex flex-row items-center mb-6 space-x-6">
               <MdCategory size={20} className="text-[#05445E]" />
               <select
-                className="px-4 py-1 border border-gray-300 rounded focus:outline-none text-gray-500 placeholder:text-gray-400"
+                className="px-3 py-2 border border-gray-500 rounded-md focus:outline-none text-gray-500 placeholder:text-gray-400 text-sm"
                 value={facility}
                 onChange={(e) => setFacility(e.target.value)}
               >
@@ -285,7 +288,7 @@ const EditModal = ({ booking, onClose }) => {
                           `${t.time}:${t.minute} ${t.period}` ===
                           `${time.time}:${time.minute} ${time.period}`
                       );
-                      return currentIndex > startIndex; // Only show times after start time
+                      return currentIndex > startIndex;
                     })
                     .map((time, key) => (
                       <option
@@ -312,38 +315,35 @@ const EditModal = ({ booking, onClose }) => {
                 setFilteredPeople={setFilteredPeople}
               />
             </section>
-            <div className="mb-6 flex flex-col">
-              <div className="flex flex-wrap items-center gap-2">
-                {guests.map((guest, index) => (
-                  <div key={index} className="flex items-center ml-12">
-                    <input
-                      type="email"
-                      value={guest.email}
-                      onChange={(e) => {
-                        const updatedGuests = [...guests];
-                        updatedGuests[index].email = e.target.value;
-                        setGuests(updatedGuests);
-                      }}
-                      className="border border-gray-300 rounded-sm p-1 focus:outline-none text-sm"
-                      placeholder="Enter guest email"
-                    />
+            <div className="mb-6 flex justify-start items-center gap-4">
+              <div className="timeIcon w-[40px] flex justify-start align-middle text-[#05445E]">
+                <AiOutlineUsergroupAdd size={21} />
+              </div>
+              <div className="w-full flex flex-wrap items-center border-b-[1px] border-gray-300">
+                {guests?.map((guest, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center border border-[#05445E] text-[#05445E] px-2 py-1 rounded-lg mr-2 mb-1 text-sm"
+                  >
+                    {guest.email}
                     <button
-                      onClick={() =>
-                        setGuests(guests.filter((_, i) => i !== index))
-                      }
-                      className="ml-2 text-sm text-red-800 hover:text-red-700"
+                      onClick={() => removeGuest(index)}
+                      className="ml-2 text-gray-500 hover:text-[#05445E]"
                     >
-                      Remove
+                      <ClearIcon fontSize="small" />
                     </button>
                   </div>
                 ))}
+                <input
+                  type="text"
+                  name="guests"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="flex-grow p-1 focus:outline-none placeholder:text-gray-500"
+                  placeholder="Add guest emails (press Enter)"
+                />
               </div>
-              <button
-                onClick={() => setGuests([...guests, { email: "" }])}
-                className="mt-2 ml-11 px-1 py-1 bg-[#05445E] text-white rounded-sm hover:bg-[#05445E]/80 shadow-md"
-              >
-                Add Guest
-              </button>
             </div>
             {coordList && (
               <div>
@@ -379,9 +379,11 @@ const EditModal = ({ booking, onClose }) => {
                 {isModalOpen && (
                   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md">
-                      <GoogleMapComponent
+                      {/* <GoogleMapComponent
                         onLocationSelect={setSelectedLocation}
-                      />
+                      /> */}
+
+                      <CreateGoogleMap onLocationSelect={setSelectedLocation} />
 
                       <div className="flex justify-between mt-4">
                         <div>
@@ -452,7 +454,6 @@ const EditModal = ({ booking, onClose }) => {
                                 ...prev,
                                 selectedLocation,
                               ]);
-                              console.log(location, "loooo");
                               setNewLocationModal(false);
                             } else {
                               alert("Please select a location");
@@ -465,42 +466,43 @@ const EditModal = ({ booking, onClose }) => {
                     </div>
                   </div>
                 )}
-                {location.length > 0 && (
-                  <div>
-                    {location.map((loc, index) => (
-                      <div
-                        key={index}
-                        className="ml-10 flex justify-between items-start border border-[#05445E] text-[#05445E] text-sm p-2 mb-2 bg-transparent rounded-md"
-                      >
-                        <p>{loc?.name || loc?.address}</p>
-                        <button
-                          className="ml-2"
-                          onClick={() => {
-                            // Remove the selected location
-                            setLocation((prev) =>
-                              prev.filter((_, i) => i !== index)
-                            );
-                          }}
+                {location.length > 0 &&
+                  (console.log(location, "location/////"),
+                  (
+                    <div>
+                      {location.map((loc, index) => (
+                        <div
+                          key={index}
+                          className="ml-10 flex justify-between items-start border border-[#05445E] text-[#05445E] text-sm p-2 mb-2 bg-transparent rounded-md"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="size-5"
+                          <p>{loc?.name}</p>
+                          <button
+                            className="ml-2"
+                            onClick={() => {
+                              setLocation((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              );
+                            }}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="size-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
               </div>
             )}
             <div className="mb-4 flex flex-row items-center space-x-6">
@@ -518,7 +520,8 @@ const EditModal = ({ booking, onClose }) => {
                 type="textarea"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="border border-gray-300 rounded-sm w-full focus:outline-none p-2 text-gray-700"
+                className="border border-gray-500 rounded-sm w-full focus:outline-none p-2 text-gray-700"
+                maxLength={200}
               >
                 {note}
               </textarea>
@@ -526,7 +529,7 @@ const EditModal = ({ booking, onClose }) => {
             <div className="flex justify-end space-x-6 z-50">
               <button
                 onClick={onClose}
-                className="px-4 py-1 bg-[#d4f1f4] text-[#05445E] rounded-sm hover:bg-[#d4f1f4]/80 transition shadow-md "
+                className="px-4 py-1 bg-[#d4f1f4] text-[#05445E] rounded-sm hover:bg-[#d4f1f4]/80 transition shadow-md"
               >
                 Cancel
               </button>

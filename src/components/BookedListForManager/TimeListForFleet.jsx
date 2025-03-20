@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import timeList from "../../assets/public/time.json";
 import BookedListForApprove from "./BookedListForApprove";
 import { useFacilitynamesQuery } from "../../apps/features/apiSlice";
@@ -9,7 +9,6 @@ function TimeListForFleet({
   bookedList,
   onBookingSelect,
 }) {
-  console.log(bookedList, "bookedList");
   const [selectedBooking, setSelectedBooking] = useState(null);
   const {
     data: facilityNames,
@@ -22,20 +21,6 @@ function TimeListForFleet({
     : [];
   console.log(booked, "bookedddd");
   const time = timeList.time;
-
-  useEffect(() => {
-    if (!bookedList || bookedList?.length === 0) return;
-    const firstBooking = bookedList[0]?.data[0];
-    console.log(firstBooking, "firstBooking");
-
-    if (!selectedBooking && firstBooking) {
-      setSelectedBooking(firstBooking);
-      onBookingSelect(firstBooking);
-    } else {
-      setSelectedBooking(null);
-      onBookingSelect;
-    }
-  }, [changeDate, bookedList, onBookingSelect]);
 
   const handleBookingClick = (booking) => {
     setSelectedBooking((prev) => (prev?.id === booking.id ? prev : booking));
@@ -69,8 +54,8 @@ function TimeListForFleet({
 
   return (
     <div>
-      <div className="date-layout relative w-full border-gray-800 h-[1600px] pt-1">
-        <div className="grid grid-cols-[50px_repeat(3,1fr)] gap-2  text-center py-2">
+      <div className="date-layout relative w-full border-gray-800 pt-1">
+        <div className="grid grid-cols-[55px_repeat(3,1fr)] text-center py-2">
           <div className="text-left px-2"></div>
           {facilityNames?.data?.map((fleet, index) => (
             <>
@@ -99,7 +84,7 @@ function TimeListForFleet({
                     returnData.push(
                       <li
                         key={`${index}-${i}`}
-                        className={`min-h-[15px] flex items-start justify-between relative `}
+                        className={`h-[17px] flex items-start justify-between relative `}
                       >
                         {i === 0 ? (
                           <>
@@ -135,16 +120,13 @@ function TimeListForFleet({
                     console.log(fleetIndex, "fleetIndex");
 
                     const columnWidth = 93 / facilityNames?.data?.length;
-                    // const baseLeftPosition = `${
-                    //   fleetIndex * columnWidth + columnWidth / 3
-                    // }`;
+
                     return (
                       <div
                         key={index}
                         className={`absolute rounded-md cursor-pointer booking-item`}
                         style={{
-                          // left: `${baseLeftPosition}%`,
-                          "--base-left": `${
+                          left: `${
                             fleetIndex * columnWidth + columnWidth / 3
                           }%`,
                           // zIndex: 30,
@@ -156,8 +138,18 @@ function TimeListForFleet({
                           id={item?.id}
                           bookedId={booked?.map((item) => item?.id)}
                           name={item?.title}
-                          fromTime={item?.start_time}
-                          toTime={item?.end_time}
+                          fromTime={
+                            item?.start_time
+                              ?.replace("PM", "pm")
+                              .replace("AM", "am")
+                              .replace(/^0/, "") || ""
+                          }
+                          toTime={
+                            item?.end_time
+                              ?.replace("PM", "pm")
+                              .replace("AM", "am")
+                              .replace(/^0/, "") || ""
+                          }
                           note={item?.note}
                           book_date={item?.book_date}
                           facility_id={item?.facility_id}

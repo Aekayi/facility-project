@@ -86,6 +86,10 @@ function ReservationMap() {
   console.log(loginUser, "loginUser");
   const username = loginUser[0]?.name;
 
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
   return (
     <>
       <div className="flex flex-col h-full min-h-screen w-full">
@@ -97,6 +101,8 @@ function ReservationMap() {
               srcset=""
               width="110px"
               height="39.93px"
+              onClick={handleLogoClick}
+              className="cursor-pointer"
             />
             <h3 className="text-xl font-semibold">Reservation In Map</h3>
           </div>

@@ -4,6 +4,7 @@ import persistStore from "redux-persist/es/persistStore";
 import persistReducer from "redux-persist/es/persistReducer";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./features/AuthSlice";
+import { setupListeners } from "@reduxjs/toolkit/query";
 
 const persistConfig = {
   key: "auth",
@@ -23,3 +24,5 @@ export const store = configureStore({
     }).concat(apiSlice.middleware),
 });
 export const persistor = persistStore(store);
+
+setupListeners(store.dispatch);
